@@ -1,0 +1,15 @@
+abuse: admin
+bin: admin
+daemon: admin
+ftp: admin
+hostmaster: admin
+postmaster: admin
+mailer-daemon: admin
+nobody: admin
+operator: admin
+postmaster: admin
+root: admin
+uucp: admin
+webmaster: admin
+joe: joealdersonstrachan
+john: joealdersonstrachan

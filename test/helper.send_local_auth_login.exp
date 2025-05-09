@@ -1,0 +1,110 @@
+#!/usr/bin/expect -f
+
+#
+# Received args (from send_local_auth_login.test.sh)
+#
+set username [lindex $argv 0]
+set password [lindex $argv 1]
+set client [lindex $argv 2]
+set host [lindex $argv 3]
+set port [lindex $argv 4]
+
+#
+# Log user output: 0 (none), 1 (show)
+#
+log_user 0
+
+#
+# Timeout (seconds)
+#
+set timeout 10
+
+#
+# Exit codes
+#
+set EXIT_CODE_SUCCESS 0
+set EXIT_CODE_ERROR_AUTH 1
+set EXIT_CODE_ERROR_DEFAULT 2
+set EXIT_CODE_ERROR_TIMEOUT 3
+set exit_code "$EXIT_CODE_ERROR_DEFAULT"
+
+#
+# Spawn telnet
+#
+spawn telnet "$host" "$port"
+
+#
+# Expected / send SMTP responses
+#
+expect {
+  #
+  # 220
+  #
+  "220 mail.strachan.email ESMTP Exim" {
+    send "EHLO $client\r"
+    exp_continue;
+  }
+
+  #
+  # 250
+  #
+  "250 HELP" {
+    send "AUTH LOGIN\r";
+    exp_continue
+  }
+
+  #
+  # 334: request for base64 encoded username
+  #
+  "334 VXNlcm5hbWU6" {
+    send "$username\r";
+    exp_continue;
+  }
+
+  #
+  # 334: request for base64 encoded password
+  #
+  "334 UGFzc3dvcmQ6" {
+    send "$password\r";
+    exp_continue;
+  }
+
+  #
+  # 225: auth success
+  #
+  "235 Authentication succeeded" {
+    send "QUIT\r";
+    set exit_code "$EXIT_CODE_SUCCESS";
+    exp_continue;
+  }
+
+  #
+  # 535: auth error
+  #
+  "535" {
+    send "QUIT\r";
+    set exit_code "$EXIT_CODE_ERROR_AUTH";
+    exp_continue;
+  }
+
+  #
+  # Closing connection
+  #
+  "221 mail.strachan.email closing connection" {
+    exp_continue;
+  }
+
+  #
+  # End of file
+  #
+  eof {
+    exit "$exit_code";
+  }
+
+  #
+  # Timeout
+  #
+  timeout {
+    exit "$EXIT_CODE_ERROR_TIMEOUT";
+  }
+}

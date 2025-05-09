@@ -1,0 +1,21 @@
+{
+  "ignorePaths": [".git", ".github", "coverage", "dist", "node_modules"],
+  "language": "en-gb",
+  "languageSettings": [
+    {
+      "languageId": "bash, javascript, typescript"
+    }
+  ],
+  "version": "0.2",
+  "words": [
+    "ad",
+    "datr",
+    "granul",
+    "granul8",
+    "healthcheck",
+    "mariadb",
+    "succcess",
+    "tsconfg",
+    "tspaths"
+  ]
+}

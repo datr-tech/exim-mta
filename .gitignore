@@ -1,0 +1,15 @@
+*.log
+*.err
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+dump.rdb
+.env
+npm-debug.log
+.idea/
+.DS_Store
+lib/
+node_modules/
+Dockerfile.wp

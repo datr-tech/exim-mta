@@ -1,0 +1,15 @@
+.dockerignore
+.editorconfig
+.mailmap
+
+CHANGELOG.md
+commitlint.config.mjs
+compose.yaml
+cspell.json
+Dockerfile
+README.md
+
+.github/
+.husky/
+
+test/

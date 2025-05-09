@@ -1,0 +1,19 @@
+services:
+  exim-mta:
+    build: .
+    container_name: exim-mta
+    ports:
+      - 25:25
+      - 465:465
+      - 587:587
+    healthcheck:
+      test: [ "CMD", "netstat -tuplen | grep 25" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - net-exim
+networks:
+  net-exim:
+    driver: bridge

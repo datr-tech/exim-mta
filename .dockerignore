@@ -1,0 +1,10 @@
+CHANGELOG.md
+commitlint.config.js
+cspell.json
+LICENSE.txt
+README.md
+tsconfig.json
+
+.git
+.github
+.husky

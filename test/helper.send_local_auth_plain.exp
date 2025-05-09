@@ -1,0 +1,106 @@
+#!/usr/bin/expect -f
+
+#
+# Received args (from send_local_auth_plain.test.sh)
+#
+set combined_username_password_base64 [lindex $argv 0]
+set client [lindex $argv 1]
+set host [lindex $argv 2]
+set port [lindex $argv 3]
+
+#
+# Log user output: 0 (none), 1 (show)
+#
+log_user 0
+
+#
+# Timeout (seconds)
+#
+set timeout 10
+
+#
+# Exit codes
+#
+set EXIT_CODE_SUCCESS 0
+set EXIT_CODE_ERROR_AUTH 1
+set EXIT_CODE_ERROR_DEFAULT 2
+set EXIT_CODE_ERROR_TIMEOUT 3
+set EXIT_CODE_ERROR_SYSTEM 4
+set exit_code "$EXIT_CODE_ERROR_DEFAULT"
+
+#
+# Spawn telnet
+#
+spawn telnet "$host" "$port"
+
+#
+# Expect block
+#
+expect {
+
+  #
+  # Introduction
+  #
+  "220 mail.strachan.email ESMTP Exim" {
+    send "EHLO $client\r"
+    exp_continue
+  }
+
+  #
+  # Server lists auth mechanisms
+  #
+  "250-CHUNKING" {
+    send "AUTH PLAIN\r"
+    exp_continue
+  }
+
+  #
+  # 'User' input
+  #
+  "334" {
+    send "$combined_username_password_base64\r"
+    exp_continue
+  }
+
+  #
+  # Auth success
+  #
+  "235 Authentication succeeded" {
+    set exit_code "$EXIT_CODE_SUCCESS"
+    send "QUIT\r"
+    exp_continue
+  }
+  
+	#
+  # System error
+  #
+  "435" {
+    set exit_code "$EXIT_CODE_ERROR_SYSTEM"
+    send "QUIT\r"
+    exp_continue
+  }
+
+  #
+  # Auth error
+  #
+  "535 Incorrect authentication data" {
+    set exit_code "$EXIT_CODE_ERROR_AUTH"
+    send "QUIT\r"
+    exp_continue
+  }
+
+  #
+  # End of file
+  #
+  eof {
+    exit "$exit_code";
+  }
+
+  #
+  # Timeout
+  #
+  timeout {
+    exit "$EXIT_CODE_ERROR_TIMEOUT";
+  }
+}
+

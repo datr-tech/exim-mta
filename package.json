@@ -1,0 +1,55 @@
+{
+  "name": "@datr.tech/exim-mta",
+  "description": "datr.tech exim mail transfer agent",
+  "version": "0.3.0",
+  "private": false,
+  "homepage": "https://github.com/datr.tech/exim-mta",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datr.tech/exim-mta.git"
+  },
+  "keywords": [
+    "@app-emta",
+    "@datr.tech",
+    "bash",
+    "email",
+    "exim",
+    "mta"
+  ],
+  "license": "MIT",
+  "author": "admin <admin@datr.tech>",
+  "engines": {
+    "node": ">=20.0.9",
+    "npm": ">=10.1.0"
+  },
+  "scripts": {
+    "changelog": "npx auto-changelog",
+    "changelog:add": "git add ./CHANGELOG.md",
+    "changelog:commit": "git commit -m 'ci: update changelog' --no-verify",
+    "commit-msg": "commitlint --edit",
+    "docker:up": "docker compose up",
+    "docker:down": "docker compose down",
+    "docker:rmi": "docker rmi $(docker image ls -a -q)",
+    "format": "npx editorconfig-cli -e ./.editorconfig ./scripts/*.sh ./test/*.sh",
+    "lint": "npx shellcheck -C ./scripts/*.sh ./test/*.sh",
+    "precommit": "npm-run-all format lint spell",
+    "preinstall": "./scripts/preinstall.sh",
+    "prepare": "husky",
+    "prepush": "npm run lint",
+    "preversion": "npm-run-all format lint spell",
+    "spell": "npx cspell .",
+    "start": "npm run docker:up",
+    "stop": "npm-run-all docker-down docker:rmi",
+    "test": "/lib/bashunit ./test/*.test.sh",
+    "version": "npm-run-all changelog"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@htmlacademy/editorconfig-cli": "^3.0.0",
+    "auto-changelog": "^2.5.0",
+    "husky": "^9.1.7",
+    "npm-run-all": "^4.1.5",
+    "shellcheck": "^3.1.0"
+  }
+}
