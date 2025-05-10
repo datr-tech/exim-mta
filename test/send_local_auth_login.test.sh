@@ -42,13 +42,13 @@ declare    USERNAME_INVALID_TWO="abc"
 # FIXTURES: [ username, password, exit_code_expected ]
 #
 declare -a FIXTURES=(
-  "${USERNAME_VALID}       ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_SUCCESS}"
-  "${USERNAME_VALID}       ${DELIM} ${USERNAME_VALID}       ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${USERNAME_INVALID_ONE} ${DELIM} ${USERNAME_INVALID_ONE} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_ONE}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_TWO}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_INVALID_THREE}   ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+   "${USERNAME_VALID}       ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_SUCCESS}"
+   "${USERNAME_VALID}       ${DELIM} ${USERNAME_VALID}       ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+   "${USERNAME_INVALID_ONE} ${DELIM} ${USERNAME_INVALID_ONE} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+   "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_ONE}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+   "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_TWO}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+   "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+   "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_INVALID_THREE}   ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
 )
 
 #
@@ -98,11 +98,11 @@ function test_send_local_auth_login() {
     # ARRANGE 3
     #
     # Trim the values of the per fixture properties
-    # The definition of 'trim' can be found in ./bootstrap.sh
+    # The definition of 'bootstrap__trim' can be found in ./bootstrap.sh
     #
-    username="$(trim "${username}")"
-    password="$(trim "${password}")"
-    exit_code_expected="$(trim "${exit_code_expected}")"
+    username="$(bootstrap__trim "${username}")"
+    password="$(bootstrap__trim "${password}")"
+    exit_code_expected="$(bootstrap__trim "${exit_code_expected}")"
 
     #
     # ACT

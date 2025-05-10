@@ -1,0 +1,583 @@
+#!/usr/bin/expect -f
+
+
+############################################################
+############################################################
+#                                                          #
+#                                                          #
+# SCRIPT:  helper.imap_email_retrieval.exp                 #
+#                                                          #
+# DATES:   Created: 2023/02/12                             #
+#          Revised: 2023/02/20                             #
+#                                                          #
+# AUTHOR:  J.A.Strachan                                    #
+#                                                          #
+############################################################
+############################################################
+
+
+############################################################
+############################################################
+#                                                          #
+#                                                          #
+# CONTENTS: DOCUMENTATION                                  #
+# =======================                                  #
+#                                                          #
+#                                                          #
+# 1. INTRO                                                 #
+# --------                                                 #
+#                                                          #
+#    1.a  Script description                               #
+#                                                          #
+#         1.a.1  Spawn a Telnet virtual terminal           #
+#         1.a.1. Initiate an IMAP session                  #
+#         1.a.3  IMAP login                                #
+#         1.a.4  IMAP select inbox                         #
+#         1.a.5  IMAP search                               #
+#         1.a.6  Retrieve email                            #
+#         1.a.7  Write to STDOUT                           #
+#                                                          #
+#    1.b  Required arguments                               #
+#    1.c  Example usage                                    #
+#                                                          #
+#         1.c.1  An example call with placeholder args     #
+#         1.c.1. An example of a non-secure localhost call #
+#                                                          #
+#                                                          #
+############################################################
+############################################################
+
+
+############################################################
+############################################################
+#                                                          #
+#                                                          #
+# CONTENTS: CODE                                           #
+# ==============                                           #
+#                                                          #
+#                                                          #
+# 2. CODE SETUP                                            #
+# -------------                                            #
+#                                                          #
+#    2.a  Assign the required args to local vars           #
+#    2.b  Set Expect script vars                           #
+#    2.c  Define common vars, including the exit codes     #
+#                                                          #
+#                                                          #
+# 3. SPAWN TELNET                                          #
+# ---------------                                          #
+#                                                          #
+#                                                          #
+# 4. INTERACT WITH IMAP                                    #
+# ---------------------                                    #
+#                                                          #
+#    4.a  Success matches                                  #
+#                                                          #
+#         4.a.1  IMAP login                                #
+#         4.a.2  IMAP select inbox                         #
+#         4.a.3  IMAP search                               #
+#         4.a.4  Retrieve email                            #
+#         4.a.4. Write to STDOUT                           #
+#                                                          #
+#    4.b  Logout & EOF matches                             #
+#                                                          #
+#         4.b.1  Logout completed                          #
+#         4.b.2  EOF                                       #
+#                                                          #
+#    4.c  Error matches                                    #
+#                                                          #
+#         4.c.1  Authentication failed                     #
+#         4.c.2  Command error                             #
+#         4.c.3  Command unknown                           #
+#         4.c.4  Search error                              #
+#         4.c.5  IMAP timeout                              #
+#         4.c.6  Expect timeout                            #
+#                                                          #
+#                                                          #
+############################################################
+############################################################
+
+
+############################################################
+############################################################
+#                                                          #
+#                                                          #
+# 1. INTRO                                                 #
+#                                                          #
+#                                                          #
+############################################################
+############################################################
+
+
+############################################################
+#                                                          #
+#                                                          #
+# 1.a Script description                                   #
+# ======================                                   #
+#                                                          #
+# This Expect script makes use of the received args,       #
+# whose documentation can be found immediately below       #
+# in the ARGS section of this INTRO, to perform the        #
+# following tasks.                                         #
+#                                                          #
+#                                                          #
+# 1.a.1 Spawn a Telnet virtual terminal                    #
+# -------------------------------------                    #
+#                                                          #
+# The script will begin by attempting, automatically, to   #
+# spawn a Telnet virtual terminal. At least from the       #
+# perspective of the code statements further below, the    #
+# virtual terminal will support only programmatic          #
+# interactivity. Furthermore, it will do so only from      #
+# within the Expect 'match' blocks.                        #
+#                                                          #
+# After all, the Expect DSL is commonly used to support    #
+# the development of headless automation scripts.          #
+#                                                          #
+# @see code section 3. for the associated code.            #
+#                                                          #
+#                                                          #
+# 1.a.3 Initiate an IMAP session                           #
+# ------------------------------                           #
+#                                                          #
+# Using Telnet, the script will then attempt an automated  #
+# initiation of an IMAP session. The attempted initiation  #
+# will take place on the server identified by the received #
+# <host> and <port> values, which are mandated args.       #
+#                                                          #
+#                                                          #
+# 1.a.4 IMAP login                                         #
+# ----------------                                         #
+#                                                          #
+# If an IMAP session was established, the script will      #
+# then attempt to perform an automated login onto the      #
+# server, using the IMAP 'LOGIN' command, and making       #
+# use of the received <username> and <password> values,    #
+# which are also mandated args. @see code section 4.a.1.   #
+#                                                          #
+#                                                          #
+# 1.a.5 IMAP select inbox                                  #
+# -----------------------                                  #
+#                                                          #
+# If the user was logged in, the script will then attempt  #
+# to automatically enter the IMAP 'SELECT INBOX' command.  #
+# When successful, the command will return the details of  #
+# the mailbox associated with the logged in user. @see     #
+# code section 4.a.1.                                      #
+#                                                          #
+#                                                          #
+# 1.a.6 IMAP search                                        #
+# -----------------                                        #
+#                                                          #
+# If the details of the user's mailbox were retrieved,     #
+# the script will then attempt to initiate an automated    #
+# IMAP 'SEARCH' (from within the previously selected       #
+# INBOX).                                                  #
+#                                                          #
+# The search process will attempt to match the subject     #
+# text from the headers of all available emails (for the   #
+# logged in user only) with the value of the received      #
+# $subject variable, which is a required arg. The          #
+# process will return a list (on success) of message       #
+# sequence numbers. @see code section 4.a.3.               #
+#                                                          #
+#                                                          #
+# 1.a.7 Retrieve email                                     #
+# --------------------                                     #
+#                                                          #
+# If the search process returned a list containing         #
+# at least one message sequence number, the script         #
+# will attempt to perform an IMAP 'FETCH', using the       #
+# first of sequence numbers. In this case, the  'FETCH'    #
+# command will be instructed to download the body of the   #
+# INBOX email represented by sequence number. @see code    #
+# section 4.a.4.                                           #
+#                                                          #
+#                                                          #
+# 1.a.8 Write to STDOUT                                    #
+# ---------------------                                    #
+#                                                          #
+# If the IMAP 'FETCH' command was successful, the          #
+# script will then attempt to write the text of the        #
+# downloaded email's body to STDOUT, enabling it to        #
+# be used in a secondary script, such as one of the        #
+# Bashunit tests. @see code section 4.a.5.                 #
+#                                                          #
+#                                                          #
+############################################################
+
+
+############################################################
+#                                                          #
+#                                                          #
+# 1.b Required arguments                                   #
+# ======================                                   #
+#                                                          #
+#                                                          #
+# Argument name  |  Description                            #
+# -------------     -----------                            #
+#                                                          #
+#                                                          #
+# username          The name of the user for whom this     #
+#                   script will attempt to perform IMAP    #
+#                   operations, such a 'LOGIN' and 'FETCH' #
+#                                                          #
+#                                                          #
+# password          A plain text instance of the login     #
+#                   password for the user identified by    #
+#                   'username'.                            #
+#                                                          #
+#                                                          #
+# host              The IP address of the IMAP server to   #
+#                   which this script will attempt to      #
+#                   perform a login, using the received    #
+#                   'username' and 'password' values.      #
+#                                                          #
+#                                                          #
+# port              The IMAP server's port.                #
+#                                                          #
+#                                                          #
+# subject           The header subject of an email for     #
+#                   which an IMAP 'SEARCH' will be         #
+#                   conducted.                             #
+#                                                          #
+#                                                          #
+# Please note that ALL of the described arguments          #
+# are REQUIRED. In addition, they MUST be passed to the    #
+# script in the order in which they are listed above.      #
+#                                                          #
+#                                                          #
+############################################################
+
+
+############################################################
+#                                                          #
+#                                                          #
+# 1.c Example usage                                        #
+# =================                                        #
+#                                                          #
+#                                                          #
+# 1.c.1 An example call with placeholder args              #
+# -------------------------------------------              #
+#                                                          #
+# ./helper.imap_email_retrieval.exp     \                  #
+#    <username>                         \                  #
+#    <password>                         \                  #
+#    <host>                             \                  #
+#    <port>                             \                  #
+#    <subject>                                             #
+#                                                          #
+#                                                          #
+# 1.c.2 An example of a non-secure localhost call          #
+# -----------------------------------------------          #
+#                                                          #
+# ./helper.imap_email_retrieval.exp     \                  #
+#    an-example-username                \                  #
+#    a-plaintext-password               \                  #
+#    127.0.0.1                          \                  #
+#    143                                \                  #
+#    an-email-subject                                      #
+#                                                          #
+#                                                          #
+############################################################
+
+
+############################################################
+############################################################
+#                                                          #
+#                                                          #
+# 2. CODE SETUP                                            #
+#                                                          #
+#                                                          #
+############################################################
+############################################################
+
+
+############################################################
+#                                                          #
+# 2.a Assign the required args to local vars               #
+#                                                          #
+############################################################
+
+set user    [lindex $argv 0]
+set pass    [lindex $argv 1]
+set host    [lindex $argv 2]
+set port    [lindex $argv 3]
+set subject [lindex $argv 4]
+
+
+############################################################
+#                                                          #
+# 2.b Set Expect script vars                               #
+#                                                          #
+############################################################
+
+#
+# Log user output: 0 (none), 2.(show)
+#
+log_user 0
+
+#
+# Timeout (seconds)
+#
+set timeout 20
+
+
+############################################################
+#                                                          #
+# 2.c Define common vars, including the exit codes         #
+#                                                          #
+############################################################
+
+#
+# Command prefix
+#
+set cmd_prefix "a"
+
+#
+# Exit codes
+#
+set EXIT_CODE_SUCCESS       0
+set EXIT_CODE_ERROR_AUTH    1
+set EXIT_CODE_ERROR_COMMAND 2
+set EXIT_CODE_ERROR_CMD_UNK 3
+set EXIT_CODE_ERROR_SEARCH  4
+set EXIT_CODE_ERROR_DEFAULT 5
+set EXIT_CODE_ERROR_TIMEOUT 6
+
+set exit_code "$EXIT_CODE_ERROR_DEFAULT"
+
+#
+# Search vars
+#
+set search_result_phrase ""
+set search_result_message_number ""
+
+
+############################################################
+############################################################
+#                                                          #
+#                                                          #
+# 3 SPAWN TELNET                                           #
+#                                                          #
+#                                                          #
+############################################################
+############################################################
+
+
+spawn telnet "$host" "$port"
+
+
+############################################################
+############################################################
+#                                                          #
+#                                                          #
+# 4 INTERACT WITH IMAP                                     #
+#                                                          #
+#                                                          #
+############################################################
+############################################################
+
+
+expect {
+
+
+  ##########################################################
+  #                                                        #
+  #  4.a Success matches                                   #
+  #                                                        #
+  ##########################################################
+
+
+  #
+  # 4.a.1 IMAP login
+  #
+  # When ready, attempt to login
+  #
+  "OK * ready" {
+    send "$cmd_prefix LOGIN $user $pass\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.a.2 IMAP select inbox
+  #
+  # If the login was successful,
+  # then attempt to select the inbox
+  #
+  "Logged in" {
+    send "$cmd_prefix SELECT INBOX\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.a.3 IMAP search
+  #
+  # If information about the inbox was returned,
+  # and if the last line of the details about
+  # that mailbox began with 'Predicted next UID',
+  # then attempt to perform a search for a specific
+  # email using the received $subject arg.
+  #
+  "Predicted next UID" {
+    expect *
+    send "$cmd_prefix SEARCH TEXT $subject\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.a.4.Retrieve email
+  #
+  # If the search successfully returned as least 1 item,
+  # then attempt to fetch the body of the associated email.
+	#
+  -re "SEARCH \[1-9]{1}\[0-9]*" {
+		
+		#
+		# The successfully matched phrase, 'SEARCH <message_number>',
+		# will have been stored by Expect in $expect_out(0,string).
+		# The statement directly below simply populates a local var
+		# with the phrase.
+		#
+		set search_result_phrase $expect_out(0,string)
+
+		#
+		# The TCL regexp command below will be used to extract
+		# the <message_number> from the 'SEARCH <message number>'
+		# phrase. Note that $search_result_message_number is
+		# subsequently used within the FETCH command.
+		#
+		set search_result_message_number [regexp -inline {[\d]+} $search_result_phrase]
+	
+    expect *
+    
+		send "$cmd_prefix FETCH $search_result_message_number BODY\[\]\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.a.4.Write to STDOUT
+  #
+  # If the body of the email, as identified above by the
+  # $subject arg, was returned successfully, then attempt to
+  # write the body's text to STDOUT. Then logout.
+  #
+  "OK Fetch completed" {
+    puts $expect_out(buffer)
+    set exit_code "$EXIT_CODE_SUCCESS";
+    send "$cmd_prefix logout\r"
+    exp_continue;
+  }
+
+
+  ##########################################################
+  #                                                        #
+  #  4.b Logout & EOF matches                              #
+  #                                                        #
+  ##########################################################
+
+
+  #
+  # 4.b.1 Logout completed
+  #
+  # If logout has been successful,
+  # continue to 'eof'
+  #
+  "OK Logout completed" {
+    exp_continue;
+  }
+
+
+  #
+  # 4.b.2 EOF
+  #
+  eof {
+    exit "$exit_code";
+  }
+
+
+  ##########################################################
+  #                                                        #
+  #  4.c Error matches                                     #
+  #                                                        #
+  ##########################################################
+
+
+  #
+  # 4.c.1 Authentication failed
+  #
+  # If there was an auth failure,
+  # set the appropriate exit code and logout
+  #
+  "Authentication failed" {
+    set exit_code "$EXIT_CODE_ERROR_AUTH";
+    send "$cmd_prefix logout\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.c.2 Command error
+  #
+  # If there was a command error,
+  # set the appropriate exit code and logout
+  #
+  "BAD Error in IMAP command" {
+    set exit_code "$EXIT_CODE_ERROR_COMMAND";
+    send "$cmd_prefix logout\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.c.3 Command unknown
+  #
+  # If a 'entered' command was found to be unknown,
+  # set the appropriate exit code and logout
+  #
+  "BAD - command unknown" {
+    set exit_code "$EXIT_CODE_ERROR_CMD_UNK";
+    send "$cmd_prefix logout\r"
+    exp_continue;
+  }
+
+  #
+  # 4.c.4 Search error
+  #
+  # If the search failed,
+  # set the appropriate exit code and logout
+  #
+  "NO - search error" {
+    set exit_code "$EXIT_CODE_ERROR_SEARCH";
+    send "$cmd_prefix logout\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.c.5 IMAP timeout
+  #
+  # If disconnected for inactivity,
+  # set the appropriate exit code and logout
+  #
+  "BYE Disconnected for inactivity" {
+    set exit_code "$EXIT_CODE_ERROR_TIMEOUT";
+    send "$cmd_prefix logout\r"
+    exp_continue;
+  }
+
+
+  #
+  # 4.c.6 Expect timeout
+  #
+  # If Expect, itself, times out,
+  # then exit with the appropriate code.
+  #
+  timeout {
+    exit "$EXIT_CODE_ERROR_TIMEOUT";
+  }
+}

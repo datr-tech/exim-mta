@@ -2,265 +2,316 @@
 
 set -euo pipefail
 
-######################################################################
-#                                                                    #
-# 1. VARS                                                            #
-#                                                                    #
-######################################################################
+#####################################################################
+#                                                                   #
+# Script:  tls_starttls_negative.test.sh                            #
+#                                                                   #
+# Purpose: A set of negative TLS tests using ports 25 and 587       #
+#                                                                   #
+# Date:    14th February 2025 (revised)                             #
+#                                                                   #
+# Author:  J.A.Strachan                                             #
+#                                                                   #
+#####################################################################
 
-#
-# OPEN DECLARATIONS
-#
-declare    CERT_DIR
-declare    ROOT_DIR
 
-#
-# CORE
-#
-declare    DELIM=";"
-declare    MBOX_DIR="/var/mail"
-declare    MBOX_MGMT_PATH="${MBOX_DIR}/mail"
-declare    TEST_NAME="tls_starttls_negative"
-declare -i TIMEOUT=2
+#####################################################################
+#                                                                   #
+# CORE SECTIONS (within the code below)                             #
+#                                                                   #
+#                                                                   #
+# 1 TEST DEFINITION                                                 #
+#                                                                   #
+# 1.1 DATA PROVIDER ARGS                                            #
+# 1.2 CONSTANTS                                                     #
+# 1.3 WORKING VARS                                                  #
+# 1.4 REMOVE EXISTING EMAILS PER RECIPIENT                          #
+# 1.5 GENERATE MSG                                                  #
+# 1.6 SEND MSG                                                      #
+# 1.7 GET THE EXIT CODE AND THE CONTENTS OF THE DELIVERED MSG       #
+# 1.8 ASSERTIONS                                                    #
+#                                                                   #
+#                                                                   #
+# 2 TEST FIXTURE DEFINITIONS                                        #
+#                                                                   #
+#####################################################################
 
-#
-# EXIT CODES
-#
-declare -i EXIT_CODE_ERROR_INITIAL_READ=21
-declare -i EXIT_CODE_ERROR_TLS=29
-#
-# HOST AND PORTS
-#
-declare    HOST_LOCAL="localhost"
-declare -i PORT_SMTP=25
-declare -i PORT_TLSC=465
 
-#
-# TLS VERSIONS
-#
-declare    TLS_VER_1_1="tlsv1_1"
-declare    TLS_VER_1_2="tlsv1_2"
-declare    TLS_VER_1_3="tlsv1_3"
+#####################################################################
+#                                                                   #
+# 1 TEST DEFINITION (with the data_provider reference below)        #
+#                                                                   #
+#####################################################################
 
-#
-# USER VARS
-#
-declare    RCPT_ADDR_LOCAL="joe@${HOST_LOCAL}"
-declare    RCPT_ADDR_DOMAIN="joe@strachan.email"
-declare    RCPT_USER="joealdersonstrachan"
-declare    SNDR_LOCAL="admin@${HOST_LOCAL}"
-declare    SNDR_RMT="unknown@unknown.com"
-
-######################################################################
-#                                                                    #
-# 2. FIXTURES                                                        #
-#                                                                    #
-######################################################################
-
-#
-# [ rcpt; rcpt_user; sndr; tls_version; port; expected_exit_code ]
-#
-declare -a FIXTURES=(
-  #
-  # STARTTLS should not be successful with PORT_SMTP (25) and TLS v1.1
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_TLS}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_TLS}"
-
-  #
-  # STARTTLS should not be successful with PORT_SMTP (25), TLS v1.1 and a remote user
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_TLS}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_TLS}"
-
-  #
-  # STARTTLS should not be successful with PORT_TLSC (465) and TLS v1.1
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-
-  #
-  # STARTTLS should not be successful with PORT_TLSC (465), TLS v1.1 and a remote user
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_1} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-
-  #
-  # STARTTLS should not be successful with PORT_TLSC (465) and TLS v1.2
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-
-  #
-  # STARTTLS should not be successful with PORT_TLSC (465), TLS v1.2 and a remote user
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-
-  #
-  # STARTTLS should not be successful with PORT_TLSC (465) and TLS v1.3
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-
-  #
-  # STARTTLS should not be successful with PORT_TLSC (465), TLS v1.3 and a remote user
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_RMT}   ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLSC} ${DELIM} ${EXIT_CODE_ERROR_INITIAL_READ}"
-)
-
-######################################################################
-#                                                                    #
-# 3. SET UP                                                          #
-#                                                                    #
-######################################################################
-
-function set_up_before_script() {
-  ROOT_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
-  CERT_DIR="${ROOT_DIR}/ca/intermediate"
-}
-
-######################################################################
-#                                                                    #
-# 4. TEST                                                            #
-#                                                                    #
-######################################################################
-
+# data_provider test_tls_starttls_negative_fixtures
 function test_tls_starttls_negative() {
-  #
-  # Exit code vars
-  #
-  declare exit_code_expected
-  declare exit_code_found
 
-  #
-  # Fixture vars
-  #
-  declare    fixture
-  declare -a fixture_array
-  declare -i i
 
-  #
-  # Port and TLS version
-  #
-  declare port
-  declare tls_version
+  ###################################################################
+  #                                                                 #
+  # 1.1 DATA PROVIDER ARGS                                          #
+  #                                                                 #
+  ###################################################################
 
-  #
-  # Message and mailbox var
-  #
-  declare msg_data
-  declare msg_subject
-  declare mgmt_mbox_contents_found
+  local -i -r fixture_id="$(($1))"
+  local    -r recipient_email=$2
+  local    -r recipient_user=$3
+  local    -r sender_email=$4
+  local    -r tls_version=$5
+  local -i -r port="$(($6))"
+  local -r -r exit_code_expected="$(($7))"
 
-  #
-  # User vars
-  #
-  declare rcpt
-  declare rcpt_mbox_contents_found
-  declare rcpt_mbox_path
-  declare rcpt_user
-  declare sndr
 
-  #
-  # Iterate over FIXTURES,
-  # performing a test per fixture
-  #
-  for i in "${!FIXTURES[@]}"
-  do
-    #
-    # ARRANGE 1
-    #
-    # Extract the ith fixture from FIXTURES and split it into fixture_array
-    #
-    fixture="${FIXTURES["${i}"]}"
-    IFS="${DELIM}" read -r -a fixture_array <<< "${fixture}"
+  ###################################################################
+  #                                                                 #
+  # 1.2 CONSTANTS                                                   #
+  #                                                                 #
+  ###################################################################
 
-    #
-    # ARRANGE 2
-    #
-    # Extract per fixture properties from the array
-    #
-    rcpt="${fixture_array[0]}"
-    rcpt_user="${fixture_array[1]}"
-    sndr="${fixture_array[2]}"
-    tls_version="${fixture_array[3]}"
-    port="${fixture_array[4]}"
-    exit_code_expected="${fixture_array[5]}"
+  local    -r cert_dir="$(bootstrap__get_cert_dir)"
+  local    -r test_name="tls_starttls_negative"
+  local -i -r timeout=2
 
-    #
-    # ARRANGE 3
-    #
-    # Trim the values of the per fixture properties
-    # The definition of 'trim' can be found in ./bootstrap.sh
-    #
-    rcpt="$(trim "${rcpt}")"
-    rcpt_user="$(trim "${rcpt_user}")"
-    sndr="$(trim "${sndr}")"
-    tls_version="$(trim "${tls_version}")"
-    port="$(trim "${port}")"
-    exit_code_expected="$(trim "${exit_code_expected}")"
 
-    #
-    # ARRANGE 4
-    #
-    msg_subject="${TEST_NAME}_${i}_${tls_version}_${port}"
-    msg_data="TO: ${rcpt}\nFROM: ${sndr}\nSUBJECT: ${msg_subject}\nDATA: ${msg_subject}\n."
+  ###################################################################
+  #                                                                 #
+  # 1.3 WORKING VARS                                                #
+  #                                                                 #
+  ###################################################################
 
-    #
-    # ARRANGE 5
-    #
-    rcpt_mbox_path="${MBOX_DIR}/${rcpt_user}"
+  local       email_path=""
+  local -i    exit_code_found=-1
+  local       message_data=""
+  local       message_subject=""
 
-    if [ -f "${rcpt_mbox_path}" ]; then
-      rm -f "${rcpt_mbox_path}"
-    fi
 
-    if [ -f "${MBOX_MGMT_PATH}" ]; then
-      rm -f "${MBOX_MGMT_PATH}"
-    fi
+  ###################################################################
+  #                                                                 #
+  # 1.4 REMOVE EXISTING EMAILS PER RECIPIENT                        #
+  #                                                                 #
+  ###################################################################
 
-    #
-    # ACT
-    #
-    swaks                                                           \
-      --to              "${rcpt}"                                   \
-      --from            "${sndr}"                                   \
-      --server          "${HOST_LOCAL}"                             \
-      --port            "${port}"                                   \
-      --data            "${msg_data}"                               \
-      --timeout         "${TIMEOUT}"                                \
-      --tls-cert        "${CERT_DIR}/certs/user.cert.pem"           \
-      --tls-key         "${CERT_DIR}/private/user.key.pem"          \
-      --tls-protocol    "${tls_version}"                            \
-      -tls                                                          \
-      > /dev/null 2>&1
+  bootstrap__rm_maildir_emails "${recipient_user}"
+
+
+  ###################################################################
+  #                                                                 #
+  # 1.5 GENERATE MSG                                                #
+  #                                                                 #
+  ###################################################################
+
+  message_subject=$(                     \
+    bootstrap__generate_message_subject  \
+      "${test_name}"                     \
+      "${recipient_email}"               \
+      "${sender_email}"                  \
+      "${fixture_id}"                    \
+  )
+
+  message_data=$(                        \
+    bootstrap__generate_message_data     \
+      "${recipient_email}"               \
+      "${sender_email}"                  \
+      "${message_subject}"               \
+  )
+
+
+  ###################################################################
+  #                                                                 #
+  # 1.6 SEND MSG                                                    #
+  #                                                                 #
+  ###################################################################
+
+  swaks                                                           \
+    --to              "${recipient_email}"                        \
+    --from            "${sender_email}"                           \
+    --server          "${BOOTSTRAP_DOMAIN_LOCAL}"                 \
+    --port            "${port}"                                   \
+    --data            "${message_data}"                           \
+    --timeout         "${timeout}"                                \
+    --tls-cert        "${cert_dir}/certs/user.cert.pem"           \
+    --tls-key         "${cert_dir}/private/user.key.pem"          \
+    --tls-protocol    "${tls_version}"                            \
+    -tls                                                          \
+  > /dev/null 2>&1
+
+
+  ###################################################################
+  #                                                                 #
+  # 1.7 GET THE EXIT CODE AND THE CONTENTS OF THE DELIVERED MSG     #
+  #                                                                 #
+  ###################################################################
 
     exit_code_found=$?
-    sleep 0.5
-    mgmt_mbox_contents_found=$(cat "${MBOX_MGMT_PATH}" 2>/dev/null)
-    rcpt_mbox_contents_found=$(cat "${rcpt_mbox_path}" 2>/dev/null)
+    sleep 0.3
 
-    #
-    # ASSERT
-    #
-    assert_same  "${exit_code_expected}" "${exit_code_found}"
-    assert_empty "${mgmt_mbox_contents_found}"
-    assert_empty "${rcpt_mbox_contents_found}"
+    email_path="$(                               \
+      bootstrap__get_maildir_latest_email_path   \
+        "${recipient_user}"                      \
+    )"
 
-    #
-    # TEARDOWN PER FIXTURE
-    #
-    exit_code_expected=""
-    exit_code_found=""
-    msg_data=""
-    msg_subject=""
-    port=""
-    rcpt=""
-    rcpt_mbox_path=""
-    rcpt_user=""
-    sndr=""
-    tls_version=""
-  done
+
+  ###################################################################
+  #                                                                 #
+  # 1.8 ASSERTIONS                                                  #
+  #                                                                 #
+  ###################################################################
+
+    assert_empty      "${email_path}"
+    assert_not_empty  "${message_subject}"
+    assert_same       "${exit_code_expected}" "${exit_code_found}"
+}
+
+
+#####################################################################
+#                                                                   #
+# 2 TEST FIXTURE DEFINITIONS                                        #
+#                                                                   #
+#####################################################################
+
+function test_tls_starttls_negative_fixtures() {
+
+  #
+  # [ id, recipient_email, recipient_user, sender_email, tls_version, port, exit_code_expected ]
+  #
+
+  #
+  # STARTTLS should not be successful with PORT 25 and TLS v1.1
+  #
+  echo 0                                            \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
+       29
+
+  echo 1                                            \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
+       29
+
+  echo 2                                            \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
+       29
+
+  echo 3                                            \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
+       29
+
+  #
+  # STARTTLS should not be successful with PORT 465 and TLS v1.1
+  #
+  echo 4                                            \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 5                                            \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 6                                            \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 7                                            \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_1}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  #
+  # STARTTLS should not be successful with PORT 465 and TLS v1.2
+  #
+  echo 8                                            \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_2}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 9                                            \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_2}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 10                                           \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_2}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 11                                           \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_2}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  #
+  # STARTTLS should not be successful with PORT 465 and TLS v1.3
+  #
+  echo 12                                           \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_3}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 13                                           \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
+       "${BOOTSTRAP_TLS_1_3}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 14                                           \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_3}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
+
+  echo 15                                           \
+       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
+       "${BOOTSTRAP_USER_TEST}"                     \
+       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
+       "${BOOTSTRAP_TLS_1_3}"                       \
+       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
+       21
 }

@@ -7,7 +7,7 @@ set -euo pipefail
 #
 declare    DNS_IP="127.0.0.1"
 declare -i DNS_NUM_RETRIES=1
-declare -i DNS_PORT=30045
+declare -i DNS_PORT=53
 declare -i DNS_TIMEOUT_SECONDS=1
 declare    DELIM=";"
 
@@ -36,8 +36,8 @@ function test_dns_reverse_positive() {
   #
   # Trimmed per fixture vars
   #
-  declare ip_to_lookup_trimmed
-  declare domain_expected_trimmed
+  declare ip_to_lookup_bootstrap__trimmed
+  declare domain_expected_bootstrap__trimmed
 
   #
   # Count var
@@ -71,8 +71,8 @@ function test_dns_reverse_positive() {
     #
     # Trim the extracted values
     #
-    ip_to_lookup_trimmed="$( trim "${ip_to_lookup}" )"
-    domain_expected_trimmed="$( trim "${domain_expected}" )"
+    ip_to_lookup_bootstrap__trimmed="$( bootstrap__trim "${ip_to_lookup}" )"
+    domain_expected_bootstrap__trimmed="$( bootstrap__trim "${domain_expected}" )"
 
     #
     # ACT
@@ -86,9 +86,9 @@ function test_dns_reverse_positive() {
 				-port="${DNS_PORT}"               \
         -retry="${DNS_NUM_RETRIES}"       \
         -timeout="${DNS_TIMEOUT_SECONDS}" \
-        "${ip_to_lookup_trimmed}"         \
+        "${ip_to_lookup_bootstrap__trimmed}"         \
         "${DNS_IP}" |                     \
-      grep -c "${domain_expected_trimmed}"
+      grep -c "${domain_expected_bootstrap__trimmed}"
     )"
 
     #
@@ -102,8 +102,8 @@ function test_dns_reverse_positive() {
     ip_to_lookup=""
     domain_expected=""
 
-    ip_to_lookup_trimmed=""
-    domain_expected_trimmed=""
+    ip_to_lookup_bootstrap__trimmed=""
+    domain_expected_bootstrap__trimmed=""
 
     domain_expected_count=0
   done

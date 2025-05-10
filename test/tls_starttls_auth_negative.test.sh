@@ -2,295 +2,480 @@
 
 set -euo pipefail
 
-######################################################################
-#                                                                    #
-# 1. VARS                                                            #
-#                                                                    #
-######################################################################
+#####################################################################
+#                                                                   #
+# Script:  tls_starttls_auth_negative.test.sh                       #
+#                                                                   #
+# Purpose: A set of negative TLS tests with auth                    #
+#                                                                   #
+# Date:    14th February 2025 (revised)                             #
+#                                                                   #
+# Author:  J.A.Strachan                                             #
+#                                                                   #
+#####################################################################
 
-#
-# OPEN DECLARATIONS
-#
-declare    CERT_DIR
-declare    ROOT_DIR
 
-#
-# CORE
-#
-declare    DELIM=";"
-declare    DOMAIN="strachan.email"""
-declare    MBOX_DIR="/var/mail"
-declare    TEST_NAME="tls_starttls_auth_negative"
+#####################################################################
+#                                                                   #
+# CORE SECTIONS (within the code below)                             #
+#                                                                   #
+#                                                                   #
+# 1 TEST DEFINITION                                                 #
+#                                                                   #
+# 1.1 DATA PROVIDER ARGS                                            #
+# 1.2 CONSTANTS                                                     #
+# 1.3 WORKING VARS                                                  #
+# 1.4 REMOVE EXISTING EMAILS PER RECIPIENT                          #
+# 1.5 GENERATE MSG                                                  #
+# 1.6 SEND MSG                                                      #
+# 1.7 GET THE EXIT CODE AND THE CONTENTS OF THE DELIVERED MSG       #
+# 1.8 ASSERTIONS                                                    #
+#                                                                   #
+#                                                                   #
+# 2 TEST FIXTURE DEFINITIONS                                        #
+#                                                                   #
+#####################################################################
 
-#
-# AUTH TYPES
-#
-declare    AUTH_TYPE_LOGIN="LOGIN"
-declare    AUTH_TYPE_PLAIN="PLAIN"
-declare    AUTH_TYPE_UNSUPPORTED="DIGEST-MD5"
 
-#
-# EXIT CODES
-#
-declare -i EXIT_CODE_ERROR_AUTH=28
+#####################################################################
+#                                                                   #
+# 1 TEST DEFINITION (with the data_provider reference below)        #
+#                                                                   #
+#####################################################################
 
-#
-# HOST AND PORTS
-#
-declare    HOST_LOCAL="localhost"
-declare -i PORT_SMTP=25
-declare -i PORT_TLS=587
+# data_provider test_tls_starttls_auth_negative_fixtures
+function test_tls_starttls_auth_negative() {
 
-#
-# TLS VERSIONS
-#
-declare    TLS_VER_1_2="tlsv1_2"
-declare    TLS_VER_1_3="tlsv1_3"
 
-#
-# USER VARS
-#
-declare    RCPT_USER="admin"
-declare    RCPT_ADDR_LOCAL="${RCPT_USER}@${HOST_LOCAL}"
-declare    RCPT_ADDR_DOMAIN="${RCPT_USER}@${DOMAIN}"
+  ###################################################################
+  #                                                                 #
+  # 1.1 DATA PROVIDER ARGS                                          #
+  #                                                                 #
+  ###################################################################
 
-declare    SNDR_LOCAL="joe@${HOST_LOCAL}"
-declare    SNDR_PASS="INVALID_PASSWORD"
-declare    SNDR_USER="joealdersonstrachan"
+  local -i -r fixture_id="$(($1))"
+  local    -r recipient_email=$2
+  local    -r recipient_user=$3
+  local    -r sender_email=$4
+  local    -r sender_user=$5
+  local    -r sender_pass=$6
+  local    -r tls_version=$7
+  local -i -r port="$(($8))"
+  local    -r auth_type=$9
+  local -i -r exit_code_expected="$(("${10}"))"
 
-######################################################################
-#                                                                    #
-# 2. FIXTURES                                                        #
-#                                                                    #
-######################################################################
+  
+  ###################################################################
+  #                                                                 #
+  # 1.2 CONSTANTS                                                   #
+  #                                                                 #
+  ###################################################################
 
-#
-# [ rcpt; rcpt_user; sndr; tls_version; port; exit_code_expected ]
-#
-declare -a FIXTURES=(
+  local    -r cert_dir="$(bootstrap__get_cert_dir)"
+  local    -r test_name="test_tls_starttls_auth_negative"
+
+  
+  ###################################################################
+  #                                                                 #
+  # 1.3 WORKING VARS                                                #
+  #                                                                 #
+  ###################################################################
+
+  local       email_path=""
+  local -i    exit_code_found=1
+  local       message_data=""
+  local       message_subject=""
+
+  
+  ###################################################################
+  #                                                                 #
+  # 1.4 REMOVE EXISTING EMAILS PER RECIPIENT                        #
+  #                                                                 #
+  ###################################################################
+
+  bootstrap__rm_maildir_emails "${recipient_user}"
+    
+  
+  ###################################################################
+  #                                                                 #
+  # 1.5 GENERATE MSG                                                #
+  #                                                                 #
+  ###################################################################
+  
+  message_subject=$(                     \
+    bootstrap__generate_message_subject  \
+      "${test_name}"                     \
+      "${recipient_email}"               \
+      "${sender_email}"                  \
+      "${fixture_id}"                    \
+  )
+
+  message_data=$(                        \
+    bootstrap__generate_message_data     \
+      "${recipient_email}"               \
+      "${sender_email}"                  \
+      "${message_subject}"               \
+  )
+
+  
+  ###################################################################
+  #                                                                 #
+  # 1.6 SEND MSG                                                    #
+  #                                                                 #
+  ###################################################################
+  
+  swaks                                                           \
+    --to              "${recipient_email}"                        \
+    --from            "${sender_email}"                           \
+    --auth            "${auth_type}"                              \
+    --auth-user       "${sender_user}"                            \
+    --auth-pass       "${sender_pass}"                            \
+    --server          "${BOOTSTRAP_DOMAIN_LOCAL}"                 \
+    --port            "${port}"                                   \
+    --data            "${message_data}"                           \
+    --tls-cert        "${cert_dir}/certs/user.cert.pem"           \
+    --tls-key         "${cert_dir}/private/user.key.pem"          \
+    --tls-protocol    "${tls_version}"                            \
+    -tls                                                          \
+  > /dev/null 2>&1
+
+
+  ###################################################################
+  #                                                                 #
+  # 1.7 GET THE EXIT CODE AND THE CONTENTS OF THE DELIVERED MSG     #
+  #                                                                 #
+  ###################################################################
+  
+    exit_code_found=$?
+    sleep 0.5
+
+    email_path="$(                               \
+      bootstrap__get_maildir_latest_email_path   \
+        "${recipient_user}"                      \
+    )"
+
+
+  ###################################################################
+  #                                                                 #
+  # 1.8 ASSERTIONS                                                  #
+  #                                                                 #
+  ###################################################################
+  
+    assert_empty     "${email_path}"
+    assert_not_empty "${message_subject}"
+    assert_same      "${exit_code_expected}" "${exit_code_found}"
+}
+
+
+#####################################################################
+#                                                                   #
+# 2 TEST FIXTURE DEFINITIONS                                        #
+#                                                                   #
+#####################################################################
+
+function test_tls_starttls_auth_negative_fixtures() {
+
   #
-  # STARTTLS should not be successful with PORT 25, TLS v1.2 and an unsupported AUTH type
+  # [ id, recipient_email, recipient_user, sender_email, sender_user, sender_pass, tls_version, port, auth_type, exit_code_expected ]
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
 
   #
-  # STARTTLS should not be successful with PORT 25, TLS v1.3 and an unsupported AUTH type
+  # STARTTLS should be successful with PORT 25, TLS v1.2 and AUTH UNSUPPORTED
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  echo 0                                   \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"    \
+       "${BOOTSTRAP_USER_ADMIN}"           \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"     \
+       "${BOOTSTRAP_USER_TEST}"            \
+       "${BOOTSTRAP_USER_TEST_PASS}"       \
+       "${BOOTSTRAP_TLS_1_2}"              \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"   \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"     \
+       28
 
+  echo 1                                   \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"   \
+       "${BOOTSTRAP_USER_ADMIN}"           \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"     \
+       "${BOOTSTRAP_USER_TEST}"            \
+       "${BOOTSTRAP_USER_TEST_PASS}"       \
+       "${BOOTSTRAP_TLS_1_2}"              \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"   \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"     \
+       28
+  
+  #
+  # STARTTLS should be successful with PORT 25, TLS v1.3 and AUTH UNSUPPORTED
+  #
+  echo 2                                   \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"    \
+       "${BOOTSTRAP_USER_ADMIN}"           \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"     \
+       "${BOOTSTRAP_USER_TEST}"            \
+       "${BOOTSTRAP_USER_TEST_PASS}"       \
+       "${BOOTSTRAP_TLS_1_3}"              \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"   \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"     \
+       28
+  
+  echo 3                                   \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"   \
+       "${BOOTSTRAP_USER_ADMIN}"           \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"     \
+       "${BOOTSTRAP_USER_TEST}"            \
+       "${BOOTSTRAP_USER_TEST_PASS}"       \
+       "${BOOTSTRAP_TLS_1_3}"              \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"   \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"     \
+       28
+ 
   #
   # STARTTLS should not be successful with PORT 25, TLS v1.2, AUTH LOGIN and an invalid password
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  echo 4                                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+       28
 
+  echo 5                                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+       28
+  
   #
   # STARTTLS should not be successful with PORT 25, TLS v1.3, AUTH LOGIN and an invalid password
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  echo 6                                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+       28
+
+  echo 7                                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+       28
 
   #
   # STARTTLS should not be successful with PORT 25, TLS v1.2, AUTH PLAIN and an invalid password
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  echo 8                                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+       28
+
+  echo 9                                     \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+       28
 
   #
   # STARTTLS should not be successful with PORT 25, TLS v1.3, AUTH PLAIN and an invalid password
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_SMTP} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  echo 10                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+       28
+
+  echo 11                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"     \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+       28
 
   #
-  # STARTTLS should not be successful with PORT 587, TLS v1.2 and an unsupported AUTH type
+  # STARTTLS should not be successful with PORT 587, TLS v1.2, and AUTH UNSUPPORTED
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  echo 12                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"       \
+       28
+
+  echo 13                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS}"         \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"       \
+			 28
 
   #
-  # STARTTLS should not be successful with PORT 587, TLS v1.3 and an unsupported AUTH type
+  # STARTTLS should not be successful with PORT 587, TLS v1.3, and AUTH UNSUPPORTED
   #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_UNSUPPORTED} ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  echo 14                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS}"         \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"       \
+       28
 
-  #
-  # STARTTLS should not be successful with PORT 587, TLS v1.2, AUTH LOGIN and an invalid password
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-
-  #
-  # STARTTLS should not be successful with PORT 587, TLS v1.3, AUTH LOGIN and an invalid password
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_LOGIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-
-  #
-  # STARTTLS should not be successful with PORT 587, TLS v1.2, AUTH PLAIN and an invalid password
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_2} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-
-  #
-  # STARTTLS should not be successful with PORT 587, TLS v1.3, AUTH PLAIN and an invalid password
-  #
-  "${RCPT_ADDR_LOCAL}  ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-  "${RCPT_ADDR_DOMAIN} ${DELIM} ${RCPT_USER} ${DELIM} ${SNDR_LOCAL} ${DELIM} ${AUTH_TYPE_PLAIN}       ${DELIM} ${TLS_VER_1_3} ${DELIM} ${PORT_TLS} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-)
-
-######################################################################
-#                                                                    #
-# 3. SET UP                                                          #
-#                                                                    #
-######################################################################
-
-function set_up_before_script() {
-  ROOT_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
-  CERT_DIR="${ROOT_DIR}/ca/intermediate"
-}
-
-######################################################################
-#                                                                    #
-# 4. TEST                                                            #
-#                                                                    #
-######################################################################
-
-function test_tls_starttls_auth_negative() {
-  #
-  # Exit code vars
-  #
-  declare exit_code_expected
-  declare exit_code_found
+  echo 15                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS}"         \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_UNSUPPORTED}"       \
+			 28
 
   #
-  # Fixture vars
+  # STARTTLS should not be successful with PORT 587, TLS v1.2, AUTH LOGIN and an INVALID PASSWORD
   #
-  declare    fixture
-  declare -a fixture_array
-  declare -i i
+  echo 16                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+       28
 
-  #
-  # Auth, port and TLS version
-  #
-  declare auth_type
-  declare port
-  declare tls_version
-
-  #
-  # Message and mailbox var
-  #
-  declare msg_data
-  declare msg_subject
-
-  #
-  # User vars
-  #
-  declare rcpt
-  declare rcpt_mbox_contents_found
-  declare rcpt_mailbox_path
-  declare rcpt_user
-  declare sndr
+  echo 17                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+			 28
 
   #
-  # Iterate over FIXTURES,
-  # performing a test per fixture
+  # STARTTLS should not be successful with PORT 587, TLS v1.3, AUTH LOGIN and an INVALID PASSWORD
   #
-  for i in "${!FIXTURES[@]}"
-  do
-    #
-    # ARRANGE 1
-    #
-    # Extract the ith fixture from FIXTURES and split it into fixture_array
-    #
-    fixture="${FIXTURES["${i}"]}"
-    IFS="${DELIM}" read -r -a fixture_array <<< "${fixture}"
+  echo 16                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+       28
 
-    #
-    # ARRANGE 2
-    #
-    # Extract per fixture properties from the array
-    #
-    rcpt="${fixture_array[0]}"
-    rcpt_user="${fixture_array[1]}"
-    sndr="${fixture_array[2]}"
-    auth_type="${fixture_array[3]}"
-    tls_version="${fixture_array[4]}"
-    port="${fixture_array[5]}"
-    exit_code_expected="${fixture_array[6]}"
+  echo 17                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_LOGIN}"             \
+			 28
 
-    #
-    # ARRANGE 3
-    #
-    # Trim the values of the per fixture properties
-    # The definition of 'trim' can be found in ./bootstrap.sh
-    #
-    rcpt="$(trim "${rcpt}")"
-    rcpt_user="$(trim "${rcpt_user}")"
-    sndr="$(trim "${sndr}")"
-    auth_type="$(trim "${auth_type}")"
-    tls_version="$(trim "${tls_version}")"
-    port="$(trim "${port}")"
-    exit_code_expected="$(trim "${exit_code_expected}")"
+  #
+  # STARTTLS should not be successful with PORT 587, TLS v1.2, AUTH PLAIN and an INVALID PASSWORD
+  #
+  echo 18                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+       28
 
-    #
-    # ARRANGE 4
-    #
-    msg_subject="${TEST_NAME}_${i}_${tls_version}_${port}"
-    msg_data="TO: ${rcpt}\nFROM: ${sndr}\nSUBJECT: ${msg_subject}\nDATA: ${msg_subject}\n."
+  echo 19                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_2}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+			 28
 
-    #
-    # ARRANGE 5
-    #
-    rcpt_mailbox_path="${MBOX_DIR}/${rcpt_user}"
+  #
+  # STARTTLS should not be successful with PORT 587, TLS v1.3, AUTH PLAIN and an INVALID PASSWORD
+  #
+  echo 18                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"      \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"							 \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+       28
 
-    if [ -f "${rcpt_mailbox_path}" ]; then
-      rm -f "${rcpt_mailbox_path}"
-    fi
-
-    #
-    # ACT
-    #
-    swaks                                                           \
-      --to              "${rcpt}"                                   \
-      --from            "${sndr}"                                   \
-      --auth            "${auth_type}"                              \
-      --auth-user       "${SNDR_USER}"                              \
-      --auth-pass       "${SNDR_PASS}"                              \
-      --server          "${HOST_LOCAL}"                             \
-      --port            "${port}"                                   \
-      --data            "${msg_data}"                               \
-      --tls-cert        "${CERT_DIR}/certs/user.cert.pem"           \
-      --tls-key         "${CERT_DIR}/private/user.key.pem"          \
-      --tls-protocol    "${tls_version}"                            \
-      -tls                                                          \
-      > /dev/null 2>&1
-
-    exit_code_found=$?
-    sleep 0.5
-    rcpt_mbox_contents_found=$(cat "${rcpt_mailbox_path}" 2> /dev/null)
-
-    #
-    # ASSERT
-    #
-    assert_same  "${exit_code_expected}" "${exit_code_found}"
-    assert_empty "${rcpt_mbox_contents_found}"
-
-    #
-    # TEARDOWN PER FIXTURE
-    #
-    auth_type=""
-    exit_code_expected=""
-    exit_code_found=""
-    msg_data=""
-    msg_subject=""
-    port=""
-    rcpt=""
-    rcpt_mailbox_path=""
-    rcpt_user=""
-    sndr=""
-    tls_version=""
-  done
+  echo 19                                    \
+       "${BOOTSTRAP_EMAIL_ADMIN_DOMAIN}"     \
+       "${BOOTSTRAP_USER_ADMIN}"             \
+       "${BOOTSTRAP_EMAIL_TEST_LOCAL}"       \
+       "${BOOTSTRAP_USER_TEST}"              \
+       "${BOOTSTRAP_USER_TEST_PASS_INVALID}" \
+       "${BOOTSTRAP_TLS_1_3}"                \
+       "${BOOTSTRAP_EXIM_SECURE_PORT}"       \
+       "${BOOTSTRAP_AUTH_PLAIN}"             \
+			 28
 }

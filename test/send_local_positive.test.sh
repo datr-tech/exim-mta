@@ -2,10 +2,16 @@
 
 set -euo pipefail
 
+######################################################################
+#                                                                    #
+# 1. FIXTURES                                                        #
+#                                                                    #
+######################################################################
+
 declare -a fixtures
 
 #
-# fixtures: [rcpt_email, rcpt_user, sender_email, sender_user]
+# fixtures: [recipient_email, recipient_user, sender_email, sender_user]
 #
 fixtures=(
   "admin, admin, joealdersonstrachan, joealdersonstrachan"
@@ -33,81 +39,86 @@ fixtures=(
 
 function test_send_local_positive() {
   #
+  # Email vars
+  #
+  declare email_path
+  declare email_contents_found
+  
+  #
   # Fixture vars
   #
-  declare fixture
+  declare    fixture
   declare -a fixture_array
-
-  #
-  # Mailbox vars
-  #
-  declare mailbox
-  declare mailbox_contents_found
+	declare -i i
 
   #
   # Message vars
   #
-  declare envelope
-  declare message
+  declare message_data
+  declare message_envelope
   declare message_expected
+	declare message_timestamp
 
   #
   # RCPT / SENDER user vars
   #
-  declare rcpt_email
-  declare rcpt_user
+  declare recipient_email
+  declare recipient_user
   declare sender_email
   declare sender_user
 
-  for fixture in "${fixtures[@]}";
+  for i in "${!fixtures[@]}";
   do
     #
     # Arrange
     #
+		fixture="${fixtures[$i]}"
     IFS=', ' read -r -a fixture_array <<< "${fixture}"
 
-    rcpt_email="${fixture_array[0]}"
-    rcpt_user="${fixture_array[1]}"
+    recipient_email="${fixture_array[0]}"
+    recipient_user="${fixture_array[1]}"
     sender_email="${fixture_array[2]}"
     sender_user="${fixture_array[3]}"
 
-    mailbox="/var/mail/${rcpt_user}"
+		bootstrap__rm_maildir_emails "${recipient_user}"
 
-    if [ -f "${mailbox}" ]; then
-      rm -f "${mailbox}"
-    fi
+		message_timestamp=$(date +%s)
+    message_data="test_send_local_positive_${i}_${recipient_email}_${sender_email}_${message_timestamp}"
+    message_expected="MESSAGE: ${message_data}"
 
-    message="test_send_local_positive_${rcpt_email}"
-    message_expected="MESSAGE: ${message}"
-
-    envelope="TO: ${rcpt_user}<${rcpt_email}> \
+    message_envelope="TO: ${recipient_user}<${recipient_email}> \
       \nFROM: ${sender_user}<${sender_email}> \
-      \nSUBJECT: ${message}\n${message_expected}"
+			\nSUBJECT: ${message_data}\n${message_expected}"
 
     #
     # Act
     #
-    echo -e "${envelope}" | exim4 -t
+    echo -e "${message_envelope}" | exim4 -t
     sleep 0.3
-    mailbox_contents_found=$(cat "${mailbox}")
+
+    email_contents_found="$(bootstrap__get_maildir_latest_email "${recipient_user}")"
+    email_path="$(bootstrap__get_maildir_latest_email_path "${recipient_user}")"
 
     #
     # Assert
     #
-    assert_is_file "${mailbox}"
+    assert_is_file   "${email_path}"
     assert_not_empty "${message_expected}"
-    assert_not_empty "${mailbox_contents_found}"
-    assert_contains "${message_expected}" "${mailbox_contents_found}"
+    assert_not_empty "${email_contents_found}"
+    assert_contains  "${message_expected}" "${email_contents_found}"
 
-    envelope=""
-    mailbox=""
-    mailbox_contents_found=""
-    message=""
+    #
+    # TEARDOWN (per fixture)
+    #
+    email_contents_found=""
+    email_path=""
+		message_data=""
+    message_envelope=""
     message_expected=""
-    rcpt_email=""
-    rcpt_user=""
+    message_timestamp=""
+		recipient_email=""
+    recipient_user=""
     sender_email=""
     sender_user=""
-
   done
 }

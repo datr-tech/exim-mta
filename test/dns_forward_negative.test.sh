@@ -6,7 +6,7 @@ set -euo pipefail
 # Common vars
 #
 declare -i DNS_NUM_RETRIES=1
-declare -i DNS_PORT=30053
+declare -i DNS_PORT=53
 declare -i DNS_TIMEOUT_SECONDS=1
 declare    DELIM=";"
 
@@ -41,9 +41,9 @@ function test_dns_forward_positive() {
   #
   # Trimmed per fixture vars
   #
-  declare requested_domain_trimmed
-  declare requested_record_type_trimmed
-  declare result_should_contain_trimmed
+  declare requested_domain_bootstrap__trimmed
+  declare requested_record_type_bootstrap__trimmed
+  declare result_should_contain_bootstrap__trimmed
 
   #
   # Result count var
@@ -79,9 +79,9 @@ function test_dns_forward_positive() {
     # Trim the extracted 'requested_*'
     # and the 'result_*' values
     #
-    requested_domain_trimmed="$(trim "${requested_domain}")"
-    requested_record_type_trimmed="$(trim "${requested_record_type}")"
-    result_should_contain_trimmed="$(trim "${result_should_contain}")"
+    requested_domain_bootstrap__trimmed="$(bootstrap__trim "${requested_domain}")"
+    requested_record_type_bootstrap__trimmed="$(bootstrap__trim "${requested_record_type}")"
+    result_should_contain_bootstrap__trimmed="$(bootstrap__trim "${result_should_contain}")"
 
     #
     # ACT
@@ -95,9 +95,9 @@ function test_dns_forward_positive() {
 				-port="${DNS_PORT}"                      \
         -retry="${DNS_NUM_RETRIES}"              \
         -timeout="${DNS_TIMEOUT_SECONDS}"        \
-        -type="${requested_record_type_trimmed}" \
-        "${requested_domain_trimmed}" |          \
-      grep -c "${result_should_contain_trimmed}"
+        -type="${requested_record_type_bootstrap__trimmed}" \
+        "${requested_domain_bootstrap__trimmed}" |          \
+      grep -c "${result_should_contain_bootstrap__trimmed}"
     )"
 
 
@@ -113,9 +113,9 @@ function test_dns_forward_positive() {
     requested_record_type=""
     result_should_contain=""
 
-    requested_domain_trimmed=""
-    requested_record_type_trimmed=""
-    result_should_contain_trimmed=""
+    requested_domain_bootstrap__trimmed=""
+    requested_record_type_bootstrap__trimmed=""
+    result_should_contain_bootstrap__trimmed=""
 
     result_should_contain_count=0
   done

@@ -5,9 +5,9 @@
 #
 set username [lindex $argv 0]
 set password [lindex $argv 1]
-set client [lindex $argv 2]
-set host [lindex $argv 3]
-set port [lindex $argv 4]
+set client   [lindex $argv 2]
+set host     [lindex $argv 3]
+set port     [lindex $argv 4]
 
 #
 # Log user output: 0 (none), 1 (show)
@@ -22,10 +22,11 @@ set timeout 10
 #
 # Exit codes
 #
-set EXIT_CODE_SUCCESS 0
-set EXIT_CODE_ERROR_AUTH 1
+set EXIT_CODE_SUCCESS       0
+set EXIT_CODE_ERROR_AUTH    1
 set EXIT_CODE_ERROR_DEFAULT 2
 set EXIT_CODE_ERROR_TIMEOUT 3
+
 set exit_code "$EXIT_CODE_ERROR_DEFAULT"
 
 #
