@@ -10,10 +10,9 @@ set -euo pipefail
 #                                                                   #
 # Date:    14th February 2025 (revised)                             #
 #                                                                   #
-# Author:  J.A.Strachan                                             #
+# Author:  admin <admin@datr.tech>                                  #
 #                                                                   #
 #####################################################################
-
 
 #####################################################################
 #                                                                   #
@@ -36,7 +35,6 @@ set -euo pipefail
 #                                                                   #
 #####################################################################
 
-
 #####################################################################
 #                                                                   #
 # 1 TEST DEFINITION (with the data_provider reference below)        #
@@ -46,7 +44,6 @@ set -euo pipefail
 # data_provider test_tls_on_connect_positive_fixtures
 function test_tls_on_connect_positive() {
 
-
   ###################################################################
   #                                                                 #
   # 1.1 DATA PROVIDER ARGS                                          #
@@ -54,38 +51,35 @@ function test_tls_on_connect_positive() {
   ###################################################################
 
   local -i -r fixture_id="$(($1))"
-  local    -r recipient_email=$2
-  local    -r recipient_user=$3
-  local    -r sender_email=$4
-  local    -r tls_version=$5
+  local -r recipient_email=$2
+  local -r recipient_user=$3
+  local -r sender_email=$4
+  local -r tls_version=$5
   local -i -r port="$(($6))"
   local -r -r exit_code_expected="$(($7))"
 
-  
   ###################################################################
   #                                                                 #
   # 1.2 CONSTANTS                                                   #
   #                                                                 #
   ###################################################################
 
-  local    -r cert_dir="$(bootstrap__get_cert_dir)"
-  local    -r test_name="tls_on_connect_positive"
+  local -r cert_dir="$(bootstrap__get_cert_dir)"
+  local -r test_name="tls_on_connect_positive"
   local -i -r timeout=10
 
-  
   ###################################################################
   #                                                                 #
   # 1.3 WORKING VARS                                                #
   #                                                                 #
   ###################################################################
 
-  local       email_contents=""
-  local       email_path=""
-  local -i    exit_code_found=1
-  local       message_data=""
-  local       message_subject=""
+  local email_contents=""
+  local email_path=""
+  local -i exit_code_found=1
+  local message_data=""
+  local message_subject=""
 
-  
   ###################################################################
   #                                                                 #
   # 1.4 REMOVE EXISTING EMAILS PER RECIPIENT                        #
@@ -93,83 +87,78 @@ function test_tls_on_connect_positive() {
   ###################################################################
 
   bootstrap__rm_maildir_emails "${recipient_user}"
-    
-  
+
   ###################################################################
   #                                                                 #
   # 1.5 GENERATE MSG                                                #
   #                                                                 #
   ###################################################################
-  
-  message_subject=$(                     \
-    bootstrap__generate_message_subject  \
-      "${test_name}"                     \
-      "${recipient_email}"               \
-      "${sender_email}"                  \
-      "${fixture_id}"                    \
+
+  message_subject=$(
+    bootstrap__generate_message_subject \
+      "${test_name}" \
+      "${recipient_email}" \
+      "${sender_email}" \
+      "${fixture_id}"
   )
 
-  message_data=$(                        \
-    bootstrap__generate_message_data     \
-      "${recipient_email}"               \
-      "${sender_email}"                  \
-      "${message_subject}"               \
+  message_data=$(
+    bootstrap__generate_message_data \
+      "${recipient_email}" \
+      "${sender_email}" \
+      "${message_subject}"
   )
 
-  
   ###################################################################
   #                                                                 #
   # 1.6 SEND MSG                                                    #
   #                                                                 #
   ###################################################################
-  
-  swaks                                                           \
-    --to              "${recipient_email}"                        \
-    --from            "${sender_email}"                           \
-    --server          "${BOOTSTRAP_DOMAIN_LOCAL}"                 \
-    --port            "${port}"                                   \
-    --data            "${message_data}"                           \
-    --timeout         "${timeout}"                                \
-    --tls-cert        "${cert_dir}/certs/user.cert.pem"           \
-    --tls-key         "${cert_dir}/private/user.key.pem"          \
-    --tls-protocol    "${tls_version}"                            \
-    --tls-on-connect                                              \
-  > /dev/null 2>&1
 
-  
+  swaks \
+    --to "${recipient_email}" \
+    --from "${sender_email}" \
+    --server "${BOOTSTRAP_DOMAIN_LOCAL}" \
+    --port "${port}" \
+    --data "${message_data}" \
+    --timeout "${timeout}" \
+    --tls-cert "${cert_dir}/certs/user.cert.pem" \
+    --tls-key "${cert_dir}/private/user.key.pem" \
+    --tls-protocol "${tls_version}" \
+    --tls-on-connect \
+    > /dev/null 2>&1
+
   ###################################################################
   #                                                                 #
   # 1.7 GET THE EXIT CODE AND THE CONTENTS OF THE DELIVERED MSG     #
   #                                                                 #
   ###################################################################
-  
-    exit_code_found=$?
-    sleep 0.3
-    
-    email_contents="$(                           \
-      bootstrap__get_maildir_latest_email        \
-        "${recipient_user}"                      \
-    )"
 
-    email_path="$(                               \
-      bootstrap__get_maildir_latest_email_path   \
-        "${recipient_user}"                      \
-    )"
+  exit_code_found=$?
+  sleep 0.3
 
+  email_contents="$(
+    bootstrap__get_maildir_latest_email \
+      "${recipient_user}"
+  )"
+
+  email_path="$(
+    bootstrap__get_maildir_latest_email_path \
+      "${recipient_user}"
+  )"
 
   ###################################################################
   #                                                                 #
   # 1.8 ASSERTIONS                                                  #
   #                                                                 #
   ###################################################################
-  
-    assert_is_file   "${email_path}"
-    assert_not_empty "${email_contents}"
-    assert_not_empty "${message_subject}"
-    assert_contains  "${message_subject}"    "${email_contents}"
-    assert_same      "${exit_code_expected}" "${exit_code_found}"
-}
 
+  assert_is_file "${email_path}"
+  assert_not_empty "${email_contents}"
+  assert_not_empty "${message_subject}"
+  assert_contains "${message_subject}" "${email_contents}"
+  assert_same "${exit_code_expected}" "${exit_code_found}"
+}
 
 #####################################################################
 #                                                                   #
@@ -186,76 +175,76 @@ function test_tls_on_connect_positive_fixtures() {
   #
   # 'On connect' (submissions) should be successful with PORT 465 and TLS v1.2
   #
-  echo 0                                               \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"         \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"                \
-       "${BOOTSTRAP_TLS_1_2}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
+  echo 0 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
 
-  echo 1                                               \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"        \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"                \
-       "${BOOTSTRAP_TLS_1_2}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
-  
+  echo 1 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
+
   #
   # 'On connect' (submissions) should be successful with PORT 465 and TLS v1.3
   #
-  echo 2                                               \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"         \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"                \
-       "${BOOTSTRAP_TLS_1_3}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
+  echo 2 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
 
-  echo 3                                               \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"        \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"                \
-       "${BOOTSTRAP_TLS_1_3}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
+  echo 3 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
 
   #
   # 'On connect' (submissions) should be successful with PORT 465, TLS v1.2 and a remote sender
   #
-  echo 0                                               \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"         \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                     \
-       "${BOOTSTRAP_TLS_1_2}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
+  echo 0 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
 
-  echo 1                                               \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"        \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                     \
-       "${BOOTSTRAP_TLS_1_2}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
+  echo 1 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
 
-	#
+  #
   # 'On connect' (submissions) should be successful with PORT 465, TLS v1.3 and a remote sender
   #
-  echo 0                                               \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"         \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                     \
-       "${BOOTSTRAP_TLS_1_3}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
+  echo 0 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
 
-  echo 1                                               \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"        \
-       "${BOOTSTRAP_USER_TEST}"                        \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                     \
-       "${BOOTSTRAP_TLS_1_3}"                          \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                   \
-       0
+  echo 1 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    0
 }

@@ -5,16 +5,16 @@ set -euo pipefail
 #
 # OPEN DECLARATIONS
 #
-declare    HELPER_PATH
-declare    ROOT_DIR
-declare    TEST_DIR
+declare HELPER_PATH
+declare ROOT_DIR
+declare TEST_DIR
 
 #
 # CORE
 #
-declare    CLIENT="client.strachan.email"
-declare    DELIM=";"
-declare    HOST="localHOST"
+declare CLIENT="client.strachan.email"
+declare DELIM=";"
+declare HOST="localHOST"
 declare -i PORT=25
 
 #
@@ -26,29 +26,29 @@ declare -i EXIT_CODE_ERROR_AUTH=1
 #
 # PASSWORDS
 #
-declare    PASS_VALID="VGl0YW5pYTA5"
-declare    PASS_INVALID_ONE="${PASS_VALID}1"
-declare    PASS_INVALID_TWO="abc"
-declare    PASS_INVALID_THREE=""
+declare PASS_VALID="VGl0YW5pYTA5"
+declare PASS_INVALID_ONE="${PASS_VALID}1"
+declare PASS_INVALID_TWO="abc"
+declare PASS_INVALID_THREE=""
 
 #
 # USERNAMES
 #
-declare    USERNAME_VALID="am9lYWxkZXJzb25zdHJhY2hhbg=="
-declare    USERNAME_INVALID_ONE="Tmtub3du"
-declare    USERNAME_INVALID_TWO="abc"
+declare USERNAME_VALID="am9lYWxkZXJzb25zdHJhY2hhbg=="
+declare USERNAME_INVALID_ONE="Tmtub3du"
+declare USERNAME_INVALID_TWO="abc"
 
 #
 # FIXTURES: [ username, password, exit_code_expected ]
 #
 declare -a FIXTURES=(
-   "${USERNAME_VALID}       ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_SUCCESS}"
-   "${USERNAME_VALID}       ${DELIM} ${USERNAME_VALID}       ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-   "${USERNAME_INVALID_ONE} ${DELIM} ${USERNAME_INVALID_ONE} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-   "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_ONE}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-   "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_TWO}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-   "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
-   "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_INVALID_THREE}   ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  "${USERNAME_VALID}       ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_SUCCESS}"
+  "${USERNAME_VALID}       ${DELIM} ${USERNAME_VALID}       ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  "${USERNAME_INVALID_ONE} ${DELIM} ${USERNAME_INVALID_ONE} ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_ONE}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  "${USERNAME_VALID}       ${DELIM} ${PASS_INVALID_TWO}     ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_VALID}           ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
+  "${USERNAME_INVALID_TWO} ${DELIM} ${PASS_INVALID_THREE}   ${DELIM} ${EXIT_CODE_ERROR_AUTH}"
 )
 
 #
@@ -76,8 +76,7 @@ function test_send_local_auth_login() {
   declare exit_code_expected
   declare exit_code_found
 
-  for fixture in "${FIXTURES[@]}"
-  do
+  for fixture in "${FIXTURES[@]}"; do
     #
     # ARRANGE 1
     #

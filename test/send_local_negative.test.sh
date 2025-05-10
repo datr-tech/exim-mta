@@ -22,26 +22,26 @@ function test_send_local_negative() {
   # Email vars
   #
   declare email_path
-  
+
   #
   # Fixture vars
   #
-  declare    fixture
+  declare fixture
   declare -a fixture_array
-	declare -i i
-  
+  declare -i i
+
   #
   # Message vars
   #
   declare message_data
   declare message_envelope
-	declare message_timestamp
+  declare message_timestamp
 
   #
   # Queue vars
   #
   declare -i -r num_queued_expected=0
-  declare -i    num_queued_found=-1
+  declare -i num_queued_found=-1
 
   #
   # RCPT / SENDER user vars
@@ -56,14 +56,13 @@ function test_send_local_negative() {
   #
   bootstrap__clear_exim_queue
 
-  for i in "${!fixtures[@]}";
-  do
+  for i in "${!fixtures[@]}"; do
     #
     # ARRANGE 1
     #
     # Split 'fixture' into 'fixture_array'
     #
-		fixture="${fixtures[$i]}"
+    fixture="${fixtures[$i]}"
     IFS='; ' read -r -a fixture_array <<< "${fixture}"
 
     recipient_email="${fixture_array[0]}"
@@ -72,8 +71,8 @@ function test_send_local_negative() {
     sender_user="${fixture_array[3]}"
 
     bootstrap__rm_maildir_emails "${recipient_user}"
-		
-		message_timestamp=$(date +%s)
+
+    message_timestamp=$(date +%s)
     message_data="test_send_local_positive_${i}_${recipient_email}_${sender_email}_${message_timestamp}"
     message_envelope="TO: ${recipient_user}<${recipient_email}> \
       \nFROM: ${sender_user}<${sender_email}> \
@@ -85,9 +84,9 @@ function test_send_local_negative() {
     #
     echo -e "${message_envelope}" | exim -t
     sleep 0.3
-    
-		num_queued_found="$(bootstrap__get_num_queued_messages)"
-		email_path="$(bootstrap__get_maildir_latest_email_path "${recipient_user}")"
+
+    num_queued_found="$(bootstrap__get_num_queued_messages)"
+    email_path="$(bootstrap__get_maildir_latest_email_path "${recipient_user}")"
 
     #
     # ASSERT
@@ -99,9 +98,9 @@ function test_send_local_negative() {
     # TEARDOWN (per fixture)
     #
     bootstrap__clear_exim_queue
-    
-		email_path=""
-		message_data=""
+
+    email_path=""
+    message_data=""
     message_envelope=""
     message_timestamp=""
     num_queued_found=-1

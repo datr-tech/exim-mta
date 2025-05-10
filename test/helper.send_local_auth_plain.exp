@@ -70,8 +70,8 @@ expect {
     send "QUIT\r"
     exp_continue
   }
-  
-	#
+
+  #
   # System error
   #
   "435" {

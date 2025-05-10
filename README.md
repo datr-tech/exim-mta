@@ -1,6 +1,6 @@
 ## README: @datr.tech/exim-mta
 
-> datr.tech exim mail transfer agent 
+> datr.tech exim mail transfer agent - UNDER DEVELOPMENT
 
 ---
 

@@ -50,8 +50,7 @@ function test_sasl_auth_plain() {
   declare exit_code_expected
   declare exit_code_found
 
-  for fixture in "${fixtures[@]}"
-  do
+  for fixture in "${fixtures[@]}"; do
     #
     # Arrange
     #

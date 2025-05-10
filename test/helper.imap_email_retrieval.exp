@@ -10,7 +10,7 @@
 # DATES:   Created: 2023/02/12                             #
 #          Revised: 2023/02/20                             #
 #                                                          #
-# AUTHOR:  J.A.Strachan                                    #
+# AUTHOR:  admin <admin@datr.tech>                         #
 #                                                          #
 ############################################################
 ############################################################
@@ -433,28 +433,28 @@ expect {
   #
   # If the search successfully returned as least 1 item,
   # then attempt to fetch the body of the associated email.
-	#
+  #
   -re "SEARCH \[1-9]{1}\[0-9]*" {
-		
-		#
-		# The successfully matched phrase, 'SEARCH <message_number>',
-		# will have been stored by Expect in $expect_out(0,string).
-		# The statement directly below simply populates a local var
-		# with the phrase.
-		#
-		set search_result_phrase $expect_out(0,string)
 
-		#
-		# The TCL regexp command below will be used to extract
-		# the <message_number> from the 'SEARCH <message number>'
-		# phrase. Note that $search_result_message_number is
-		# subsequently used within the FETCH command.
-		#
-		set search_result_message_number [regexp -inline {[\d]+} $search_result_phrase]
-	
+    #
+    # The successfully matched phrase, 'SEARCH <message_number>',
+    # will have been stored by Expect in $expect_out(0,string).
+    # The statement directly below simply populates a local var
+    # with the phrase.
+    #
+    set search_result_phrase $expect_out(0,string)
+
+    #
+    # The TCL regexp command below will be used to extract
+    # the <message_number> from the 'SEARCH <message number>'
+    # phrase. Note that $search_result_message_number is
+    # subsequently used within the FETCH command.
+    #
+    set search_result_message_number [regexp -inline {[\d]+} $search_result_phrase]
+
     expect *
-    
-		send "$cmd_prefix FETCH $search_result_message_number BODY\[\]\r"
+
+    send "$cmd_prefix FETCH $search_result_message_number BODY\[\]\r"
     exp_continue;
   }
 

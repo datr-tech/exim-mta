@@ -5,11 +5,11 @@ set -euo pipefail
 #
 # Common vars
 #
-declare    DNS_IP="127.0.0.1"
+declare DNS_IP="127.0.0.1"
 declare -i DNS_NUM_RETRIES=1
 declare -i DNS_PORT=53
 declare -i DNS_TIMEOUT_SECONDS=1
-declare    DELIM=";"
+declare DELIM=";"
 
 #
 # fixtures: [ ip_to_lookup, domain_expected ]
@@ -24,7 +24,7 @@ function test_dns_reverse_positive() {
   #
   # Fixture vars
   #
-  declare    fixture
+  declare fixture
   declare -a fixture_array
 
   #
@@ -48,8 +48,7 @@ function test_dns_reverse_positive() {
   # Loop through the fixtures and
   # perform a test per fixture
   #
-  for fixture in "${fixtures[@]}"
-  do
+  for fixture in "${fixtures[@]}"; do
     #
     # ARRANGE 1
     #
@@ -71,8 +70,8 @@ function test_dns_reverse_positive() {
     #
     # Trim the extracted values
     #
-    ip_to_lookup_bootstrap__trimmed="$( bootstrap__trim "${ip_to_lookup}" )"
-    domain_expected_bootstrap__trimmed="$( bootstrap__trim "${domain_expected}" )"
+    ip_to_lookup_bootstrap__trimmed="$(bootstrap__trim "${ip_to_lookup}")"
+    domain_expected_bootstrap__trimmed="$(bootstrap__trim "${domain_expected}")"
 
     #
     # ACT
@@ -82,13 +81,13 @@ function test_dns_reverse_positive() {
     # domain?
     #
     domain_expected_count="$(
-      nslookup                            \
-				-port="${DNS_PORT}"               \
-        -retry="${DNS_NUM_RETRIES}"       \
+      nslookup \
+        -port="${DNS_PORT}" \
+        -retry="${DNS_NUM_RETRIES}" \
         -timeout="${DNS_TIMEOUT_SECONDS}" \
-        "${ip_to_lookup_bootstrap__trimmed}"         \
-        "${DNS_IP}" |                     \
-      grep -c "${domain_expected_bootstrap__trimmed}"
+        "${ip_to_lookup_bootstrap__trimmed}" \
+        "${DNS_IP}" \
+        | grep -c "${domain_expected_bootstrap__trimmed}"
     )"
 
     #

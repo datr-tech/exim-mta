@@ -5,11 +5,11 @@ set -euo pipefail
 #
 # Common vars
 #
-declare    DNS_IP="127.0.0.1"
+declare DNS_IP="127.0.0.1"
 declare -i DNS_NUM_RETRIES=1
 declare -i DNS_PORT=53
 declare -i DNS_TIMEOUT_SECONDS=1
-declare    DELIM=";"
+declare DELIM=";"
 
 #
 # Fixtures: [ requested_domain, requested_record_type, result_should_contain ]
@@ -30,7 +30,7 @@ function test_dns_forward_positive() {
   #
   # Fixture vars
   #
-  declare    fixture
+  declare fixture
   declare -a fixture_array
 
   #
@@ -56,8 +56,7 @@ function test_dns_forward_positive() {
   # Loop through the fixtures and
   # perform a test per fixture
   #
-  for fixture in "${fixtures[@]}"
-  do
+  for fixture in "${fixtures[@]}"; do
     #
     # ARRANGE 1
     #
@@ -93,16 +92,15 @@ function test_dns_forward_positive() {
     # of values with 'result_should_contain'?
     #
     result_should_contain_count="$(
-      nslookup                                   \
-				-port="${DNS_PORT}"                      \
-        -retry="${DNS_NUM_RETRIES}"              \
-        -timeout="${DNS_TIMEOUT_SECONDS}"        \
+      nslookup \
+        -port="${DNS_PORT}" \
+        -retry="${DNS_NUM_RETRIES}" \
+        -timeout="${DNS_TIMEOUT_SECONDS}" \
         -type="${requested_record_type_bootstrap__trimmed}" \
-        "${requested_domain_bootstrap__trimmed}"            \
-        "${DNS_IP}" |                            \
-      grep -c "${result_should_contain_bootstrap__trimmed}"
+        "${requested_domain_bootstrap__trimmed}" \
+        "${DNS_IP}" \
+        | grep -c "${result_should_contain_bootstrap__trimmed}"
     )"
-
 
     #
     # ASSERT

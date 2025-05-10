@@ -1,5 +1,14 @@
 {
-  "ignorePaths": [".git", ".github", "coverage", "dist", "node_modules"],
+  "ignorePaths": [
+    ".git",
+    ".github",
+    "conf",
+    "coverage",
+    "dist",
+    "lib",
+    "node_modules",
+    "./Dockerfile.wp"
+  ],
   "language": "en-gb",
   "languageSettings": [
     {
@@ -8,14 +17,37 @@
   ],
   "version": "0.2",
   "words": [
-    "ad",
+    "Bashunit",
+    "BUILDKIT",
     "datr",
-    "granul",
-    "granul8",
+    "dvcm",
+    "EHLO",
+    "emta",
+    "ESMTP",
+    "EXIM",
+    "gnutls",
     "healthcheck",
-    "mariadb",
-    "succcess",
-    "tsconfg",
-    "tspaths"
+    "hhbg",
+    "hostmaster",
+    "joestrachan",
+    "joealdersonstrachan",
+    "lindex",
+    "maildir",
+    "Nlcm",
+    "noninteractive",
+    "nslookup",
+    "NXDOMAIN",
+    "RCPT",
+    "shellcheck",
+    "STARTTLS",
+    "SASL",
+    "SNDR",
+    "swaks",
+    "TEARDOWN",
+    "TLSC",
+    "Tmtub",
+    "tuplen",
+    "VARS",
+    "vars"
   ]
 }

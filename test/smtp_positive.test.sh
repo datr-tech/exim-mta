@@ -11,10 +11,10 @@ set -euo pipefail
 #
 # CORE
 #
-declare    DELIM=";"
-declare    DOMAIN="strachan.email"""
-declare    MBOX_DIR="/var/mail"
-declare    TEST_NAME="smtp_positive"
+declare DELIM=";"
+declare DOMAIN="strachan.email"""
+declare MBOX_DIR="/var/mail"
+declare TEST_NAME="smtp_positive"
 
 #
 # EXIT CODES
@@ -24,17 +24,17 @@ declare -i EXIT_CODE_SUCCESS=0
 #
 # HOST AND PORTS
 #
-declare    HOST_LOCAL="localhost"
+declare HOST_LOCAL="localhost"
 declare -i PORT_SMTP=25
 
 #
 # USER VARS
 #
-declare    RCPT_ADDR_LOCAL="joe@${HOST_LOCAL}"
-declare    RCPT_ADDR_DOMAIN="joe@${DOMAIN}"
-declare    RCPT_USER="joealdersonstrachan"
-declare    SNDR_LOCAL="admin@${HOST_LOCAL}"
-declare    SNDR_RMT="unknown@unknown.com"
+declare RCPT_ADDR_LOCAL="joe@${HOST_LOCAL}"
+declare RCPT_ADDR_DOMAIN="joe@${DOMAIN}"
+declare RCPT_USER="joealdersonstrachan"
+declare SNDR_LOCAL="admin@${HOST_LOCAL}"
+declare SNDR_RMT="unknown@unknown.com"
 
 ######################################################################
 #                                                                    #
@@ -75,7 +75,7 @@ function test_smtp_positive() {
   #
   # Fixture vars
   #
-  declare    fixture
+  declare fixture
   declare -a fixture_array
   declare -i i
 
@@ -103,8 +103,7 @@ function test_smtp_positive() {
   # Iterate over FIXTURES,
   # performing a test per fixture
   #
-  for i in "${!FIXTURES[@]}"
-  do
+  for i in "${!FIXTURES[@]}"; do
     #
     # ARRANGE 1
     #
@@ -147,7 +146,7 @@ function test_smtp_positive() {
     #
     rcpt_mailbox_path="${MBOX_DIR}/${rcpt_username}"
 
-		echo "${rcpt_mailbox_path}"
+    echo "${rcpt_mailbox_path}"
 
     if [ -f "${rcpt_mailbox_path}" ]; then
       rm -f "${rcpt_mailbox_path}"
@@ -156,12 +155,12 @@ function test_smtp_positive() {
     #
     # ACT
     #
-    swaks                                                           \
-      --to              "${rcpt}"                                   \
-      --from            "${sender}"                                 \
-      --server          "${HOST_LOCAL}"                             \
-      --port            "${port}"                                   \
-      --data            "${message_data}"                           \
+    swaks \
+      --to "${rcpt}" \
+      --from "${sender}" \
+      --server "${HOST_LOCAL}" \
+      --port "${port}" \
+      --data "${message_data}" \
       > /dev/null 2>&1
 
     exit_code_found=$?

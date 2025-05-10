@@ -43,13 +43,13 @@ function test_send_local_positive() {
   #
   declare email_path
   declare email_contents_found
-  
+
   #
   # Fixture vars
   #
-  declare    fixture
+  declare fixture
   declare -a fixture_array
-	declare -i i
+  declare -i i
 
   #
   # Message vars
@@ -57,7 +57,7 @@ function test_send_local_positive() {
   declare message_data
   declare message_envelope
   declare message_expected
-	declare message_timestamp
+  declare message_timestamp
 
   #
   # RCPT / SENDER user vars
@@ -67,12 +67,11 @@ function test_send_local_positive() {
   declare sender_email
   declare sender_user
 
-  for i in "${!fixtures[@]}";
-  do
+  for i in "${!fixtures[@]}"; do
     #
     # Arrange
     #
-		fixture="${fixtures[$i]}"
+    fixture="${fixtures[$i]}"
     IFS=', ' read -r -a fixture_array <<< "${fixture}"
 
     recipient_email="${fixture_array[0]}"
@@ -80,15 +79,15 @@ function test_send_local_positive() {
     sender_email="${fixture_array[2]}"
     sender_user="${fixture_array[3]}"
 
-		bootstrap__rm_maildir_emails "${recipient_user}"
+    bootstrap__rm_maildir_emails "${recipient_user}"
 
-		message_timestamp=$(date +%s)
+    message_timestamp=$(date +%s)
     message_data="test_send_local_positive_${i}_${recipient_email}_${sender_email}_${message_timestamp}"
     message_expected="MESSAGE: ${message_data}"
 
     message_envelope="TO: ${recipient_user}<${recipient_email}> \
       \nFROM: ${sender_user}<${sender_email}> \
-			\nSUBJECT: ${message_data}\n${message_expected}"
+      \nSUBJECT: ${message_data}\n${message_expected}"
 
     #
     # Act
@@ -102,21 +101,21 @@ function test_send_local_positive() {
     #
     # Assert
     #
-    assert_is_file   "${email_path}"
+    assert_is_file "${email_path}"
     assert_not_empty "${message_expected}"
     assert_not_empty "${email_contents_found}"
-    assert_contains  "${message_expected}" "${email_contents_found}"
+    assert_contains "${message_expected}" "${email_contents_found}"
 
     #
     # TEARDOWN (per fixture)
     #
     email_contents_found=""
     email_path=""
-		message_data=""
+    message_data=""
     message_envelope=""
     message_expected=""
     message_timestamp=""
-		recipient_email=""
+    recipient_email=""
     recipient_user=""
     sender_email=""
     sender_user=""

@@ -13,10 +13,9 @@ set -euo pipefail
 #                                                                   #
 # Date:    13th February 2025 (revised)                             #
 #                                                                   #
-# Author:  J.A.Strachan                                             #
+# Author:  admin <admin@datr.tech>                                  #
 #                                                                   #
 #####################################################################
-
 
 #####################################################################
 #                                                                   #
@@ -55,7 +54,6 @@ set -euo pipefail
 #                                                                   #
 #####################################################################
 
-
 #####################################################################
 #####################################################################
 #                                                                   #
@@ -65,7 +63,6 @@ set -euo pipefail
 #                                                                   #
 #####################################################################
 #####################################################################
-
 
 #####################################################################
 #                                                                   #
@@ -77,7 +74,6 @@ if [[ $EUID -ne 0 ]]; then
   echo "use: sudo make test"
   exit 1
 fi
-
 
 #####################################################################
 #                                                                   #
@@ -92,7 +88,6 @@ readonly BOOTSTRAP_SCRIPT_TMP_DATA_FILE
 
 BOOTSTRAP_SCRIPT_ROOT_DIR="$(dirname "${BASH_SOURCE[-1]}")/.."
 readonly BOOTSTRAP_SCRIPT_ROOT_DIR
-
 
 #####################################################################
 #                                                                   #
@@ -121,7 +116,6 @@ declare -a -r BOOTSTRAP_SCRIPT_AND_TEST_FILE_REQUIRED_DEPENDENCIES=(
   "xargs"
 )
 
-
 #####################################################################
 #                                                                   #
 # 1.4 CHECK THE REQUIRED SCRIPT AND TEST DEPENDENCIES               #
@@ -130,14 +124,12 @@ declare -a -r BOOTSTRAP_SCRIPT_AND_TEST_FILE_REQUIRED_DEPENDENCIES=(
 
 declare required_dependency
 
-for required_dependency in "${BOOTSTRAP_SCRIPT_AND_TEST_FILE_REQUIRED_DEPENDENCIES[@]}"
-do
+for required_dependency in "${BOOTSTRAP_SCRIPT_AND_TEST_FILE_REQUIRED_DEPENDENCIES[@]}"; do
   if ! command -v "${required_dependency}" > /dev/null 2>&1; then
     echo "${BOOTSTRAP_SCRIPT_NAME}: ${required_dependency}: not found" >&2
     exit 1
   fi
 done
-
 
 #####################################################################
 #                                                                   #
@@ -165,9 +157,9 @@ declare -a -r BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS=(
   "BOOTSTRAP_EXIM_SECURE_PORT"
   "BOOTSTRAP_EXIM_TLSC_PORT"
   "BOOTSTRAP_EXIM_UNSECURE_PORT"
-	"BOOTSTRAP_IMAP_UNSECURE_PORT"
+  "BOOTSTRAP_IMAP_UNSECURE_PORT"
   "BOOTSTRAP_MAILDIR_NEW_EMAILS_DIR"
-	"BOOTSTRAP_MAILDIR_ROOT_SQL_FILE_NAME"
+  "BOOTSTRAP_MAILDIR_ROOT_SQL_FILE_NAME"
   "BOOTSTRAP_TLS_1_1"
   "BOOTSTRAP_TLS_1_2"
   "BOOTSTRAP_TLS_1_3"
@@ -179,7 +171,6 @@ declare -a -r BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS=(
   "BOOTSTRAP_USER_TEST_ALIAS_TWO"
 )
 
-
 #####################################################################
 #                                                                   #
 # 1.6 CHECK THE REQUIRED ENV VARS                                   #
@@ -188,8 +179,7 @@ declare -a -r BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS=(
 
 declare required_env_var
 
-for required_env_var in "${BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS[@]}"
-do
+for required_env_var in "${BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS[@]}"; do
   #
   # Note the use of 'indirect variable expansion' below.
   #
@@ -198,7 +188,6 @@ do
     exit 1
   fi
 done
-
 
 #####################################################################
 #                                                                   #
@@ -210,16 +199,14 @@ echo -e "\n"
 echo "AVAILABLE ENV VARS (for use in any unit test)"
 echo "---------------------------------------------"
 
-for i in "${!BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS[@]}"
-do
-	required_env_var="${BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS[$i]}"
-	echo "$i,${required_env_var},${!required_env_var}" >> "${BOOTSTRAP_SCRIPT_TMP_DATA_FILE}"
+for i in "${!BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS[@]}"; do
+  required_env_var="${BOOTSTRAP_SCRIPT_REQUIRED_ENV_VARS[$i]}"
+  echo "$i,${required_env_var},${!required_env_var}" >> "${BOOTSTRAP_SCRIPT_TMP_DATA_FILE}"
 done
 
 column --table -s "," --table-columns ITEM,ENV_VAR,VALUE < "${BOOTSTRAP_SCRIPT_TMP_DATA_FILE}"
 echo -e "\n"
 rm -f "${BOOTSTRAP_SCRIPT_TMP_DATA_FILE}"
-
 
 #####################################################################
 #                                                                   #
@@ -233,7 +220,6 @@ if [ ! -f "${BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH}" ]; then
   echo "${BOOTSTRAP_SCRIPT_NAME}: BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH: not found" >&2
   exit 1
 fi
-
 
 #####################################################################
 #####################################################################
@@ -253,7 +239,6 @@ fi
 #                                                                   #
 #####################################################################
 #####################################################################
-
 
 #####################################################################
 #                                                                   #
@@ -281,7 +266,6 @@ function bootstrap__clear_exim_queue() {
 
   "$(exim -bp | grep "<" | awk '{ print $3 }' | xargs exim -Mrm)"
 }
-
 
 #####################################################################
 #                                                                   #
@@ -395,7 +379,6 @@ function bootstrap__generate_message_envelope() {
       \nSUBJECT: ${message_subject}\n${message_data}"
 }
 
-
 #####################################################################
 #                                                                   #
 # 2.4 GENERATE MESSAGE SUBJECT                                      #
@@ -445,7 +428,6 @@ function bootstrap__generate_message_subject() {
   echo "${test_name}_${fixture_id}_${recipient_email}_${sender_email}_${message_timestamp}"
 }
 
-
 #####################################################################
 #                                                                   #
 # 2.5 GET CERT DIR                                                  #
@@ -468,7 +450,6 @@ function bootstrap__get_cert_dir() {
 
   echo "${cert_dir}"
 }
-
 
 #####################################################################
 #                                                                   #
@@ -508,11 +489,11 @@ function bootstrap__get_maildir_latest_email() {
 
   local latest_email_path=""
 
-  latest_email_path="$(                       \
-    bootstrap__get_maildir_latest_email_path  \
-      "${username}"                           \
-      "${maildir_root}"                       \
-      "${domain}"                             \
+  latest_email_path="$(
+    bootstrap__get_maildir_latest_email_path \
+      "${username}" \
+      "${maildir_root}" \
+      "${domain}"
   )"
 
   if [ ! -f "${latest_email_path}" ]; then
@@ -521,7 +502,6 @@ function bootstrap__get_maildir_latest_email() {
 
   cat "${latest_email_path}"
 }
-
 
 #####################################################################
 #                                                                   #
@@ -570,15 +550,14 @@ function bootstrap__get_maildir_latest_email_path() {
     return 1
   fi
 
-  find "${maildir_path}"          \
-    -type f                       \
-    -name "*${file_name_suffix}"  \
-    -printf "%T@ %p\n"            \
-    | sort -nr                    \
-    | head -n 1                   \
+  find "${maildir_path}" \
+    -type f \
+    -name "*${file_name_suffix}" \
+    -printf "%T@ %p\n" \
+    | sort -nr \
+    | head -n 1 \
     | cut -d " " -f 2
 }
-
 
 #####################################################################
 #                                                                   #
@@ -626,7 +605,6 @@ function bootstrap__get_maildir_path() {
   echo "${maildir_root}/${domain}/${username}/${new_emails_dir}"
 }
 
-
 #####################################################################
 #                                                                   #
 # 2.9 GET MAILDIR ROOT                                              #
@@ -651,7 +629,6 @@ function bootstrap__get_maildir_root() {
   echo "${maildir_root}"
 }
 
-
 #####################################################################
 #                                                                   #
 # 2.10 GET NUM QUEUED MESSAGES                                      #
@@ -661,7 +638,6 @@ function bootstrap__get_maildir_root() {
 function bootstrap__get_num_queued_messages() {
   exim -bp | wc -l
 }
-
 
 #####################################################################
 #                                                                   #
@@ -679,7 +655,6 @@ function bootstrap__get_num_queued_messages() {
 function bootstrap__get_root_dir() {
   echo "${BOOTSTRAP_SCRIPT_ROOT_DIR}"
 }
-
 
 #####################################################################
 #                                                                   #
@@ -725,9 +700,8 @@ function bootstrap__rm_maildir_emails() {
     return 1
   fi
 
-	rm -f "${maildir_path}/*"
+  rm -f "${maildir_path}/*"
 }
-
 
 #####################################################################
 #                                                                   #

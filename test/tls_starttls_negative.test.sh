@@ -10,10 +10,9 @@ set -euo pipefail
 #                                                                   #
 # Date:    14th February 2025 (revised)                             #
 #                                                                   #
-# Author:  J.A.Strachan                                             #
+# Author:  admin <admin@datr.tech>                                  #
 #                                                                   #
 #####################################################################
-
 
 #####################################################################
 #                                                                   #
@@ -36,7 +35,6 @@ set -euo pipefail
 #                                                                   #
 #####################################################################
 
-
 #####################################################################
 #                                                                   #
 # 1 TEST DEFINITION (with the data_provider reference below)        #
@@ -46,7 +44,6 @@ set -euo pipefail
 # data_provider test_tls_starttls_negative_fixtures
 function test_tls_starttls_negative() {
 
-
   ###################################################################
   #                                                                 #
   # 1.1 DATA PROVIDER ARGS                                          #
@@ -54,13 +51,12 @@ function test_tls_starttls_negative() {
   ###################################################################
 
   local -i -r fixture_id="$(($1))"
-  local    -r recipient_email=$2
-  local    -r recipient_user=$3
-  local    -r sender_email=$4
-  local    -r tls_version=$5
+  local -r recipient_email=$2
+  local -r recipient_user=$3
+  local -r sender_email=$4
+  local -r tls_version=$5
   local -i -r port="$(($6))"
   local -r -r exit_code_expected="$(($7))"
-
 
   ###################################################################
   #                                                                 #
@@ -68,10 +64,9 @@ function test_tls_starttls_negative() {
   #                                                                 #
   ###################################################################
 
-  local    -r cert_dir="$(bootstrap__get_cert_dir)"
-  local    -r test_name="tls_starttls_negative"
+  local -r cert_dir="$(bootstrap__get_cert_dir)"
+  local -r test_name="tls_starttls_negative"
   local -i -r timeout=2
-
 
   ###################################################################
   #                                                                 #
@@ -79,11 +74,10 @@ function test_tls_starttls_negative() {
   #                                                                 #
   ###################################################################
 
-  local       email_path=""
-  local -i    exit_code_found=-1
-  local       message_data=""
-  local       message_subject=""
-
+  local email_path=""
+  local -i exit_code_found=-1
+  local message_data=""
+  local message_subject=""
 
   ###################################################################
   #                                                                 #
@@ -93,28 +87,26 @@ function test_tls_starttls_negative() {
 
   bootstrap__rm_maildir_emails "${recipient_user}"
 
-
   ###################################################################
   #                                                                 #
   # 1.5 GENERATE MSG                                                #
   #                                                                 #
   ###################################################################
 
-  message_subject=$(                     \
-    bootstrap__generate_message_subject  \
-      "${test_name}"                     \
-      "${recipient_email}"               \
-      "${sender_email}"                  \
-      "${fixture_id}"                    \
+  message_subject=$(
+    bootstrap__generate_message_subject \
+      "${test_name}" \
+      "${recipient_email}" \
+      "${sender_email}" \
+      "${fixture_id}"
   )
 
-  message_data=$(                        \
-    bootstrap__generate_message_data     \
-      "${recipient_email}"               \
-      "${sender_email}"                  \
-      "${message_subject}"               \
+  message_data=$(
+    bootstrap__generate_message_data \
+      "${recipient_email}" \
+      "${sender_email}" \
+      "${message_subject}"
   )
-
 
   ###################################################################
   #                                                                 #
@@ -122,19 +114,18 @@ function test_tls_starttls_negative() {
   #                                                                 #
   ###################################################################
 
-  swaks                                                           \
-    --to              "${recipient_email}"                        \
-    --from            "${sender_email}"                           \
-    --server          "${BOOTSTRAP_DOMAIN_LOCAL}"                 \
-    --port            "${port}"                                   \
-    --data            "${message_data}"                           \
-    --timeout         "${timeout}"                                \
-    --tls-cert        "${cert_dir}/certs/user.cert.pem"           \
-    --tls-key         "${cert_dir}/private/user.key.pem"          \
-    --tls-protocol    "${tls_version}"                            \
-    -tls                                                          \
-  > /dev/null 2>&1
-
+  swaks \
+    --to "${recipient_email}" \
+    --from "${sender_email}" \
+    --server "${BOOTSTRAP_DOMAIN_LOCAL}" \
+    --port "${port}" \
+    --data "${message_data}" \
+    --timeout "${timeout}" \
+    --tls-cert "${cert_dir}/certs/user.cert.pem" \
+    --tls-key "${cert_dir}/private/user.key.pem" \
+    --tls-protocol "${tls_version}" \
+    -tls \
+    > /dev/null 2>&1
 
   ###################################################################
   #                                                                 #
@@ -142,14 +133,13 @@ function test_tls_starttls_negative() {
   #                                                                 #
   ###################################################################
 
-    exit_code_found=$?
-    sleep 0.3
+  exit_code_found=$?
+  sleep 0.3
 
-    email_path="$(                               \
-      bootstrap__get_maildir_latest_email_path   \
-        "${recipient_user}"                      \
-    )"
-
+  email_path="$(
+    bootstrap__get_maildir_latest_email_path \
+      "${recipient_user}"
+  )"
 
   ###################################################################
   #                                                                 #
@@ -157,11 +147,10 @@ function test_tls_starttls_negative() {
   #                                                                 #
   ###################################################################
 
-    assert_empty      "${email_path}"
-    assert_not_empty  "${message_subject}"
-    assert_same       "${exit_code_expected}" "${exit_code_found}"
+  assert_empty "${email_path}"
+  assert_not_empty "${message_subject}"
+  assert_same "${exit_code_expected}" "${exit_code_found}"
 }
-
 
 #####################################################################
 #                                                                   #
@@ -178,140 +167,140 @@ function test_tls_starttls_negative_fixtures() {
   #
   # STARTTLS should not be successful with PORT 25 and TLS v1.1
   #
-  echo 0                                            \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
-       29
+  echo 0 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_UNSECURE_PORT}" \
+    29
 
-  echo 1                                            \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
-       29
+  echo 1 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_UNSECURE_PORT}" \
+    29
 
-  echo 2                                            \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
-       29
+  echo 2 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_UNSECURE_PORT}" \
+    29
 
-  echo 3                                            \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_UNSECURE_PORT}"            \
-       29
+  echo 3 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_UNSECURE_PORT}" \
+    29
 
   #
   # STARTTLS should not be successful with PORT 465 and TLS v1.1
   #
-  echo 4                                            \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 4 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 5                                            \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 5 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 6                                            \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 6 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 7                                            \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_1}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 7 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_1}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
   #
   # STARTTLS should not be successful with PORT 465 and TLS v1.2
   #
-  echo 8                                            \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_2}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 8 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 9                                            \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_2}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 9 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 10                                           \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_2}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 10 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 11                                           \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_2}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 11 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_2}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
   #
   # STARTTLS should not be successful with PORT 465 and TLS v1.3
   #
-  echo 12                                           \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_3}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 12 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 13                                           \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}"             \
-       "${BOOTSTRAP_TLS_1_3}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 13 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_ADMIN_LOCAL}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 14                                           \
-       "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}"      \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_3}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 14 \
+    "${BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 
-  echo 15                                           \
-       "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}"     \
-       "${BOOTSTRAP_USER_TEST}"                     \
-       "${BOOTSTRAP_EMAIL_REMOTE}"                  \
-       "${BOOTSTRAP_TLS_1_3}"                       \
-       "${BOOTSTRAP_EXIM_TLSC_PORT}"                \
-       21
+  echo 15 \
+    "${BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1}" \
+    "${BOOTSTRAP_USER_TEST}" \
+    "${BOOTSTRAP_EMAIL_REMOTE}" \
+    "${BOOTSTRAP_TLS_1_3}" \
+    "${BOOTSTRAP_EXIM_TLSC_PORT}" \
+    21
 }
