@@ -13,8 +13,12 @@
 #
 # Hidden files to be ignored
 #
+.bashunit.conf
+.bashunit.conf.TEMPLATE
 .dockerignore
 .editorconfig
+.env
+.env.TEMPLATE
 .mailmap
 
 #

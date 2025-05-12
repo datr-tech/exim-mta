@@ -6,11 +6,12 @@ IFS=$'\n\t'
 #####################################################################
 #                                                                   #
 #                                                                   #
-# Script:  generate_template_from_dot_env.sh                        #
+# Script:  generate_conf_template.sh                                #
 #                                                                   #
 #                                                                   #
-# Purpose: Generate .env.TEMPLATE from .env,                        #
-#          using sed to remove the env var values.                  #
+# Purpose: Generate a clean .TEMPLATE file from the                 #
+#          received config file path.                               #
+#                                                                   #
 #                                                                   #
 # Date:    12th May 2025                                            #
 # Author:  datr.tech admin <admin@datr.tech>                        #
@@ -61,8 +62,8 @@ IFS=$'\n\t'
 #                                                                   #
 #####################################################################
 
-declare -r IN_FILE_NAME=".env"
-declare -r OUT_FILE_NAME=".env.TEMPLATE"
+declare -r IN_FILE_NAME=${1}
+declare -r OUT_FILE_NAME="${IN_FILE_NAME}.TEMPLATE"
 
 #####################################################################
 #                                                                   #

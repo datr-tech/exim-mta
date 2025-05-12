@@ -13,8 +13,11 @@
 #
 # Hidden files to be ignored
 #
+.bashunit.conf
+.bashunit.conf.TEMPLATE
 .editorconfig
 .env
+.env.TEMPLATE
 .gitignore
 .mailmap
 .npmignore

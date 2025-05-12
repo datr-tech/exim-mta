@@ -1,0 +1,86 @@
+#####################################################################
+#                                                                   #
+# Script:  bashunit.conf                                            #
+#                                                                   #
+# Purpose: Provide bashunit config and bootstrap vars.              #
+#                                                                   #
+#          Following package installation by 'npm i' this           #
+#          template file will be copied to '.bashunit.conf',        #
+#          automatically.                                           #
+#                                                                   #
+#          Within '.bashunit.conf' enter the required vars          #
+#					 before running any of the associated tests.              #
+#                                                                   #
+#          Unlike the template, '.bashunit.conf' will be            #
+#          ignored by git (see .gitignore).                         #
+#                                                                   #
+# Date:    12th May 2025                                            #
+#                                                                   #
+# Author:  admin <admin@datr.tech>                                  #
+#                                                                   #
+#####################################################################
+
+
+#####################################################################
+#                                                                   #
+# 1  BASHUIT CONFIG vars                                            #
+#                                                                   #
+#####################################################################
+
+BASHUNIT_BOOTSTRAP=""
+BASHUNIT_DEFAULT_PATH=""
+BASHUNIT_DEV_MODE='<BOOL_VALUE>'
+BASHUNIT_HEADER_ASCII_ART='<BOOL_VALUE>'
+BASHUNIT_SHOW_HEADER='<BOOL_VALUE>'
+BASHUNIT_SIMPLE_OUTPUT='<BOOL_VALUE>'
+BASHUNIT_STOP_ON_FAILURE='<BOOL_VALUE>'
+BASHUNIT_VERBOSE='<BOOL_VALUE>'
+BASHUNIT_DEV_LOG=""
+BASHUNIT_REPORT_HTML=""
+
+#
+# The following var is required by ./scripts/bashunit_load.sh,
+# which is the final sub-command to be run by 'postinstall' (NPM).
+#
+BASHUNIT_REPO_URL="https://bashunit.typeddevs.com/install.sh"
+
+#####################################################################
+#                                                                   #
+# 2. BOOTSTRAP VARS                                                 #
+#                                                                   #
+#    The variables below are passed to ./test/bootstrap.sh          #
+#    and are accessible within each of the ./test/*.test.sh files.  #
+#                                                                   #
+#####################################################################
+
+BOOTSTRAP_AUTH_LOGIN=""
+BOOTSTRAP_AUTH_PLAIN=""
+BOOTSTRAP_AUTH_UNSUPPORTED=""
+BOOTSTRAP_DOMAIN=""
+BOOTSTRAP_DOMAIN_LOCAL=""
+BOOTSTRAP_DOMAIN_MAILDIR=""
+BOOTSTRAP_EMAIL_ADMIN_LOCAL=""
+BOOTSTRAP_EMAIL_ADMIN_DOMAIN=""
+BOOTSTRAP_EMAIL_FILE_NAME_SUFFIX=""
+BOOTSTRAP_EMAIL_REMOTE=""
+BOOTSTRAP_EMAIL_TEST_LOCAL=""
+BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_1=""
+BOOTSTRAP_EMAIL_TEST_LOCAL_ALIAS_2=""
+BOOTSTRAP_EMAIL_TEST_DOMAIN=""
+BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_1=""
+BOOTSTRAP_EMAIL_TEST_DOMAIN_ALIAS_2=""
+BOOTSTRAP_EXIM_SECURE_PORT=""
+BOOTSTRAP_EXIM_TLSC_PORT=""
+BOOTSTRAP_EXIM_UNSECURE_PORT=""
+BOOTSTRAP_IMAP_UNSECURE_PORT=""
+BOOTSTRAP_MAILDIR_NEW_EMAILS_DIR=""
+BOOTSTRAP_MAILDIR_ROOT_SQL_FILE_NAME=""
+BOOTSTRAP_TLS_1_1=""
+BOOTSTRAP_TLS_1_2=""
+BOOTSTRAP_TLS_1_3=""
+BOOTSTRAP_USER_ADMIN=""
+BOOTSTRAP_USER_TEST=""
+BOOTSTRAP_USER_TEST_PASS=""
+BOOTSTRAP_USER_TEST_PASS_INVALID=""
+BOOTSTRAP_USER_TEST_ALIAS_ONE=""
+BOOTSTRAP_USER_TEST_ALIAS_TWO=""

@@ -5,7 +5,7 @@ IFS=$'\n\t'
 
 #####################################################################
 #                                                                   #
-# Script:  postinstall.sh                                           #
+# Script:  bashunit_load.sh                                         #
 #                                                                   #
 # Purpose: Triggered by NPM's install event, this script            #
 #          downloads bashunit to ../lib (relative path),            #
@@ -27,13 +27,13 @@ IFS=$'\n\t'
 # 1.1  SCRIPT CONSTANTS                                             #
 # 1.2  DEFINE THE REQUIRED SCRIPT DEPENDENCIES                      #
 # 1.3  DEFINE THE REQUIRED ENV VARS                                 #
-# 1.4  DEFINE THE DOT ENV FILE PATH                                 #
+# 1.4  DEFINE THE CONF FILE PATH                                    #
 #                                                                   #
 #                                                                   #
 # 2 DEPENDENCY AND PATH CHECKS                                      #
 #                                                                   #
 # 2.1 CHECK THE REQUIRED SCRIPT DEPENDENCIES                        #
-# 2.2 CHECK THE DOT ENV FILE PATH                                   #
+# 2.2 CHECK THE CONF FILE PATH                                      #
 #                                                                   #
 #                                                                   #
 # 3 LOAD AND CHECK ENV VARS                                         #
@@ -62,7 +62,7 @@ IFS=$'\n\t'
 #                                                                   #
 #####################################################################
 
-declare -r SCRIPT_FILE_NAME="postinstall.sh"
+declare -r SCRIPT_FILE_NAME="bashunit_load.sh"
 
 ROOT_DIR="$(dirname "${BASH_SOURCE[-1]}")/.."
 readonly ROOT_DIR
@@ -91,11 +91,12 @@ declare -a -r SCRIPT_FILE_REQUIRED_ENV_VARS=(
 
 #####################################################################
 #                                                                   #
-# 1.4 DEFINE THE DOT ENV FILE PATH                                  #
+# 1.4 DEFINE THE CONF FILE PATH                                     #
 #                                                                   #
 #####################################################################
 
-declare -r DOT_ENV_FILE_PATH="${ROOT_DIR}/.env"
+declare -r CONF_FILE_NAME=".bashunit.conf"
+declare -r CONF_FILE_PATH="${ROOT_DIR}/${CONF_FILE_NAME}"
 
 #####################################################################
 #####################################################################
@@ -111,7 +112,7 @@ declare -r DOT_ENV_FILE_PATH="${ROOT_DIR}/.env"
 #                                                                   #
 # 2.1 CHECK THE REQUIRED SCRIPT DEPENDENCIES                        #
 #                                                                   #
-####################################################################:#
+#####################################################################
 
 declare required_dependency
 
@@ -124,12 +125,12 @@ done
 
 #####################################################################
 #                                                                   #
-# 2.2 CHECK THE DOT ENV FILE PATH                                   #
+# 2.2 CHECK THE CONF FILE PATH                                      #
 #                                                                   #
 #####################################################################
 
-if [ ! -f "${DOT_ENV_FILE_PATH}" ]; then
-  echo "DOT_ENV_FILE_PATH: invalid"
+if [ ! -f "${CONF_FILE_PATH}" ]; then
+  echo "CONF_FILE_PATH: invalid"
   exit 1
 fi
 
@@ -150,7 +151,7 @@ fi
 #####################################################################
 
 # shellcheck source=.env
-source "${DOT_ENV_FILE_PATH}"
+source "${CONF_FILE_PATH}"
 
 #####################################################################
 #                                                                   #

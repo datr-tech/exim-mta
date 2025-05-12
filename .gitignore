@@ -30,6 +30,7 @@
 #
 # Hidden files to be ignored
 #
+.bashunit.conf
 .env
 
 #
