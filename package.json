@@ -1,7 +1,7 @@
 {
   "name": "@datr.tech/exim-mta",
   "description": "datr.tech exim mail transfer agent",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": false,
   "homepage": "https://github.com/datr.tech/exim-mta",
   "repository": {
