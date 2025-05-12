@@ -11,13 +11,10 @@
 #####################################################################
 
 include:
-  - ../exim-db/compose.yaml
-
+  - path: '../exim-db/compose.yaml'
 services:
   exim-mta:
     build:
-      context: .
-      dockerfile: Dockerfile
       args:
         EXIM_MTA_ADMIN: ${EXIM_MTA_ADMIN}
         EXIM_MTA_ADMIN_DIR: ${EXIM_MTA_ADMIN_DIR}
@@ -34,28 +31,30 @@ services:
         EXIM_MTA_USER_PASS: ${EXIM_MTA_USER_PASS}
         EXIM_MTA_USER_SHELL: ${EXIM_MTA_USER_SHELL}
         EXIM_MTA_USER_SYS: ${EXIM_MTA_USER_SYS}
+      context: .
+      dockerfile: Dockerfile
     container_name: ${EXIM_MTA_CONTAINER}
-    ports:
-      - ${EXIM_MTA_PORT_ON_CONNECT}:${EXIM_MTA_PORT_ON_CONNECT}
-      - ${EXIM_MTA_PORT_SECURE}:${EXIM_MTA_PORT_SECURE}
-      - ${EXIM_MTA_PORT_UNSECURE}:${EXIM_MTA_PORT_UNSECURE}
+    depends_on:
+      - exim-db
     healthcheck:
       test: ['CMD', 'netstat -tuplen | grep ${EXIM_MTA_PORT_UNSECURE}']
       interval: 10s
       timeout: 10s
       retries: 3
       start_period: 30s
+    ports:
+      - ${EXIM_MTA_PORT_ON_CONNECT}:${EXIM_MTA_PORT_ON_CONNECT}
+      - ${EXIM_MTA_PORT_SECURE}:${EXIM_MTA_PORT_SECURE}
+      - ${EXIM_MTA_PORT_UNSECURE}:${EXIM_MTA_PORT_UNSECURE}
     networks:
       - ${EXIM_NETWORK}
-        #volumes:
+    volumes:
+      - type: volume
+        source: ${EXIM_DB_SOCKET_VOLUME}
+        target: ${EXIM_DB_SOCKET_VOLUME_TARGET}
       #- type: volume
       #  source: dovecot_socket_volume
       #  target: /var/run/dovecot
       #- type: bind
       # source: /var/mail
       # target: /var/mail
-    depends_on:
-      - exim-db
-networks:
-  exim-network:
-    driver: bridge
