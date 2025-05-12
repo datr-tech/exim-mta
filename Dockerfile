@@ -1,5 +1,22 @@
 FROM ubuntu:24.04
 
+ARG EXIM_MTA_ADMIN
+ARG EXIM_MTA_ADMIN_DIR
+ARG EXIM_MTA_ADMIN_GRP
+ARG EXIM_MTA_ADMIN_SHELL
+ARG EXIM_MTA_AUTHOR
+ARG EXIM_MTA_CONF
+ARG EXIM_MTA_CONF_ALIASES
+ARG EXIM_MTA_CONF_ETC
+ARG EXIM_MTA_GRP
+ARG EXIM_MTA_USER
+ARG EXIM_MTA_USER_DIR
+ARG EXIM_MTA_USER_GRP
+ARG EXIM_MTA_USER_PASS
+ARG EXIM_MTA_USER_SHELL
+ARG EXIM_MTA_USER_SYS
+
+LABEL authors=$EXIM_MTA_AUTHOR
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y \
@@ -10,24 +27,25 @@ RUN apt update -y \
     gnutls-bin \
     sqlite3 -y \
   && apt clean -y \
-  && groupadd mail -f \
+  && groupadd $EXIM_MTA_GRP -f \
   && useradd -m \
-    -d /home/admin \
-    -g mail \
-    -s /usr/bin/bash \
-    admin \
+    -d $EXIM_MTA_ADMIN_DIR \
+    -g $EXIM_MTA_ADMIN_GRP \
+    -s $EXIM_MTA_ADMIN_SHELL \
+    $EXIM_MTA_ADMIN \
   && useradd -m \
-    -d /home/${DOCKER_MAILDIR_NAME} \
-    -g mail \
-    -s /usr/bin/bash \
-    ${DOCKER_EXIM_PASS} \
-  && echo "${DOCKER_EXIM_PASS}:${DOCKER_DOCKER_EXIM_PASS}" | chpasswd
+    -d $EXIM_MTA_USER_DIR \
+    -g $EXIM_MTA_USER_GRP \
+    -s $EXIM_MTA_USER_SHELL \
+    $EXIM_MTA_USER \
+  && echo "$EXIM_MTA_USER:$EXIM_MTA_USER_PASS" | chpasswd
 
-USER Debian-exim:mail
+USER $EXIM_MTA_USER_SYS
 
-COPY ./conf/ /etc/exim4/
-COPY ./conf/aliases /etc/
-COPY ./conf/exim4.conf /etc/
+COPY $EXIM_MTA_CONF /etc/exim4/
+COPY $EXIM_MTA_CONF_ALIASES /aliases/
+COPY $EXIM_MTA_CONF_ALIASES /etc/
+COPY $EXIM_MTA_CONF_ETC /etc/
 
 RUN /usr/sbin/update-exim4.conf
 

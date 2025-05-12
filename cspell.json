@@ -1,14 +1,5 @@
 {
-  "ignorePaths": [
-    ".git",
-    ".github",
-    "conf",
-    "coverage",
-    "dist",
-    "lib",
-    "node_modules",
-    "./Dockerfile.wp"
-  ],
+  "ignorePaths": [".git", "conf", "coverage", "lib", "node_modules"],
   "language": "en-gb",
   "languageSettings": [
     {
@@ -29,8 +20,6 @@
     "healthcheck",
     "hhbg",
     "hostmaster",
-    "joestrachan",
-    "joealdersonstrachan",
     "lindex",
     "maildir",
     "Nlcm",

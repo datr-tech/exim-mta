@@ -619,14 +619,16 @@ function bootstrap__get_maildir_path() {
 #####################################################################
 
 function bootstrap__get_maildir_root() {
-  local -r maildir_root="$(mariadb < "${BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH}" -N)"
-  sleep 0.3
+  echo "/var/mail"
 
-  if [ -z "${maildir_root}" ]; then
-    return 1
-  fi
+  #local -r maildir_root="$(mariadb < "${BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH}" -N)"
+  #sleep 0.3
 
-  echo "${maildir_root}"
+  #if [ -z "${maildir_root}" ]; then
+  #  return 1
+  #fi
+
+  #echo "${maildir_root}"
 }
 
 #####################################################################

@@ -11,5 +11,6 @@ postmaster: admin
 root: admin
 uucp: admin
 webmaster: admin
-joe: joealdersonstrachan
-john: joealdersonstrachan
+datr: datr
+dt: datr.tech
+tech: datr.tech

@@ -1,10 +1,50 @@
+#####################################################################
+#                                                                   #
+# Script:  .dockerignore                                            #
+#                                                                   #
+# Purpose: A list of files and dirs to be ignored by Docker.        #
+#                                                                   #
+# Date:    11th May 2025                                            #
+#                                                                   #
+# Author:  datr.tech admin <admin@datr.tech>                        #
+#                                                                   #
+#####################################################################
+
+#
+# Hidden files to be ignored
+#
+.editorconfig
+.env
+.gitignore
+.mailmap
+.npmignore
+.prettierignore
+.prettierrc.json
+.shellcheckrc
+
+#
+# Standard files to be ignored
+#
 CHANGELOG.md
-commitlint.config.js
+commitlint.config.mjs
 cspell.json
 LICENSE.txt
+package.json
+package-lock.json
 README.md
-tsconfig.json
 
+#
+# Hidden dirs to be ignored
+#
 .git
 .github
 .husky
+
+#
+# Standard dirs to be ignored
+#
+coverage/
+lib/
+node_modules/
+scripts/
+test/

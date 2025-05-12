@@ -32,7 +32,7 @@ declare -i PORT_SMTP=25
 #
 declare RCPT_ADDR_LOCAL="joe@${HOST_LOCAL}"
 declare RCPT_ADDR_DOMAIN="joe@${DOMAIN}"
-declare RCPT_USER="joealdersonstrachan"
+declare RCPT_USER="datr.tech"
 declare SNDR_LOCAL="admin@${HOST_LOCAL}"
 declare SNDR_RMT="unknown@unknown.com"
 

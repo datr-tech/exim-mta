@@ -1,19 +1,61 @@
+#####################################################################
+#                                                                   #
+# Script:  compose.yaml                                             #
+#                                                                   #
+# Purpose: Docker compose definition for exim-mta                   #
+#                                                                   #
+# Date:    12th May 2025 (revised)                                  #
+#                                                                   #
+# Author:  datr.tech admin <admin@datr.tech>                        #
+#                                                                   #
+#####################################################################
+
+include:
+  - ../exim-db/compose.yaml
+
 services:
   exim-mta:
-    build: .
-    container_name: exim-mta
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        EXIM_MTA_ADMIN: ${EXIM_MTA_ADMIN}
+        EXIM_MTA_ADMIN_DIR: ${EXIM_MTA_ADMIN_DIR}
+        EXIM_MTA_ADMIN_GRP: ${EXIM_MTA_ADMIN_GRP}
+        EXIM_MTA_ADMIN_SHELL: ${EXIM_MTA_ADMIN_SHELL}
+        EXIM_MTA_AUTHOR: ${EXIM_MTA_AUTHOR}
+        EXIM_MTA_CONF: ${EXIM_MTA_CONF}
+        EXIM_MTA_CONF_ALIASES: ${EXIM_MTA_CONF_ALIASES}
+        EXIM_MTA_CONF_EXIM4: ${EXIM_MTA_CONF_EXIM4}
+        EXIM_MTA_GRP: ${EXIM_MTA_GRP}
+        EXIM_MTA_USER: ${EXIM_MTA_USER}
+        EXIM_MTA_USER_DIR: ${EXIM_MTA_USER_DIR}
+        EXIM_MTA_USER_GRP: ${EXIM_MTA_USER_GRP}
+        EXIM_MTA_USER_PASS: ${EXIM_MTA_USER_PASS}
+        EXIM_MTA_USER_SHELL: ${EXIM_MTA_USER_SHELL}
+        EXIM_MTA_USER_SYS: ${EXIM_MTA_USER_SYS}
+    container_name: ${EXIM_MTA_CONTAINER}
     ports:
-      - 25:25
-      - 465:465
-      - 587:587
+      - ${EXIM_MTA_PORT_ON_CONNECT}:${EXIM_MTA_PORT_ON_CONNECT}
+      - ${EXIM_MTA_PORT_SECURE}:${EXIM_MTA_PORT_SECURE}
+      - ${EXIM_MTA_PORT_UNSECURE}:${EXIM_MTA_PORT_UNSECURE}
     healthcheck:
-      test: ['CMD', 'netstat -tuplen | grep 25']
+      test: ['CMD', 'netstat -tuplen | grep ${EXIM_MTA_PORT_UNSECURE}']
       interval: 10s
       timeout: 10s
       retries: 3
       start_period: 30s
     networks:
-      - net-exim
+      - ${EXIM_NETWORK}
+        #volumes:
+      #- type: volume
+      #  source: dovecot_socket_volume
+      #  target: /var/run/dovecot
+      #- type: bind
+      # source: /var/mail
+      # target: /var/mail
+    depends_on:
+      - exim-db
 networks:
-  net-exim:
+  exim-network:
     driver: bridge

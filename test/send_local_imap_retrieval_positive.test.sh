@@ -61,8 +61,8 @@ function test_send_local_imap_retrieval_positive() {
   local -r sender_pass=$6
   local -r host=$7
   local -i -r port="$(($8))"
-  local -i -r exit_code_exim_expected="$(("${9}"))"
-  local -i -r exit_code_imap_expected="$(("${10}"))"
+  # local -i -r exit_code_exim_expected="$(("${9}"))"
+  # local -i -r exit_code_imap_expected="$(("${10}"))"
 
   ###################################################################
   #                                                                 #
@@ -73,7 +73,7 @@ function test_send_local_imap_retrieval_positive() {
   local -r root_dir="$(bootstrap__get_root_dir)"
   local -r imap_helper_cmd="${root_dir}/test/helper.imap_email_retrieval.exp"
   local -r test_name="test_send_local_imap_retrieval_positive"
-  local -i -t timeout=2
+  # local -i -t timeout=2
 
   ###################################################################
   #                                                                 #
@@ -153,8 +153,9 @@ function test_send_local_imap_retrieval_positive() {
   #                                                                 #
   ###################################################################
 
-  declare subject_found="$(echo "${imap_retrieved_message}" | grep -c "${message_subject}")"
+  subject_found="$(echo "${imap_retrieved_message}" | grep -c "${message_subject}")"
 
+  assert_true "${subject_found}"
   assert_not_empty "${imap_retrieved_message}"
   assert_not_empty "${message_subject}"
   assert_contains "${message_subject}" "${imap_retrieved_message}"

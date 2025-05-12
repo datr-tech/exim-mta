@@ -1,14 +1,40 @@
+#####################################################################
+#                                                                   #
+# Script:  .npmignoire                                              #
+#                                                                   #
+# Purpose: A list of files and dirs to be ignored by NPM.           #
+#                                                                   #
+# Date:    12th May 2025                                            #
+#                                                                   #
+# Author:  datr.tech admin <admin@datr.tech>                        #
+#                                                                   #
+#####################################################################
+
+#
+# Hidden files to be ignored
+#
 .dockerignore
 .editorconfig
 .mailmap
 
+#
+# Hidden dirs to be ignored
+#
+.github/
+.husky/
+
+#
+# Standard dirs to be ignored
+#
+coverage
+lib/
+test/
+
+#
+# Standard files to be ignored
+#
 CHANGELOG.md
 commitlint.config.mjs
 compose.yaml
 cspell.json
 README.md
-
-.github/
-.husky/
-
-test/

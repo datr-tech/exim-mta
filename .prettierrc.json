@@ -8,6 +8,12 @@
       "options": {
         "parser": "sh"
       }
+    },
+    {
+      "files": [".env.TEMPLATE"],
+      "options": {
+        "parser": "sh"
+      }
     }
   ],
   "plugins": ["prettier-plugin-sh", "prettier-plugin-sort-json"],

@@ -1,7 +1,35 @@
+#####################################################################
+#                                                                   #
+# Script:  .prettierignore                                          #
+#                                                                   #
+# Purpose: A list of files and dirs to be ignored by prettier.      #
+#                                                                   #
+# Date:    11th May 2025                                            #
+#                                                                   #
+# Author:  datr.tech admin <admin@datr.tech>                        #
+#                                                                   #
+#####################################################################
+
+#
+# Hidden dirs to be ignored
+#
+.git/
+.husky/
+
+#
+# Hidden files to be ignored
+#
 .mailmap
+
+#
+# Standard dirs to be ignored
+#
+lib/
+node_modules/
+
+#
+# Standard files to be ignored
+#
 CHANGELOG.md
 LICENSE.txt
 package-lock.json
-.git/
-.husky/
-node_modules/

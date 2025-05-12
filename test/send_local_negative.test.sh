@@ -6,15 +6,15 @@ set -euo pipefail
 # fixtures: [recipient_email; recipient_user; sender_email; sender_user]
 #
 declare -a fixtures=(
-  "admin1; admin1; joealdersonstrachan; joealdersonstrachan"
-  "admin1@localhost; admin1; joealdersonstrachan@localhost; joealdersonstrachan"
-  "admin1@strachan.email; admin1; joealdersonstrachan@strachan.email; joealdersonstrachan"
-  "hostmaster2; hostmaster2; joealdersonstrachan; joealdersonstrachan"
-  "hostmaster2; hostmaster2; joealdersonstrachan@localhost; joealdersonstrachan"
-  "hostmaster2; hostmaster2; joealdersonstrachan@strachan.email; joealdersonstrachan"
-  "joestrachan1; joealdersonstrachan1; admin@localhost; admin"
-  "joestrachan1@localhost; joealdersonstrachan1; admin@localhost; admin"
-  "joestrachan1@strachan.email; joealdersonstrachan1; admin@localhost; admin"
+  "admin1; admin1; datr.tech; datr.tech"
+  "admin1@localhost; admin1; datr.tech@localhost; datr.tech"
+  "admin1@strachan.email; admin1; datr.tech@strachan.email; datr.tech"
+  "hostmaster2; hostmaster2; datr.tech; datr.tech"
+  "hostmaster2; hostmaster2; datr.tech@localhost; datr.tech"
+  "hostmaster2; hostmaster2; datr.tech@strachan.email; datr.tech"
+  "datr1; datr.tech1; admin@localhost; admin"
+  "datr1@localhost; datr.tech1; admin@localhost; admin"
+  "datr1@strachan.email; datr.tech1; admin@localhost; admin"
 )
 
 function test_send_local_negative() {
