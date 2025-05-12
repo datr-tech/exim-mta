@@ -209,19 +209,6 @@ echo -e "\n"
 rm -f "${BOOTSTRAP_SCRIPT_TMP_DATA_FILE}"
 
 #####################################################################
-#                                                                   #
-# 1.8 CHECK BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH                  #
-#                                                                   #
-#####################################################################
-
-declare -r BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH="${BOOTSTRAP_SCRIPT_ROOT_DIR}/sql/${BOOTSTRAP_MAILDIR_ROOT_SQL_FILE_NAME:?}"
-
-if [ ! -f "${BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH}" ]; then
-  echo "${BOOTSTRAP_SCRIPT_NAME}: BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH: not found" >&2
-  exit 1
-fi
-
-#####################################################################
 #####################################################################
 #                                                                   #
 #                                                                   #
@@ -620,15 +607,6 @@ function bootstrap__get_maildir_path() {
 
 function bootstrap__get_maildir_root() {
   echo "/var/mail"
-
-  #local -r maildir_root="$(mariadb < "${BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH}" -N)"
-  #sleep 0.3
-
-  #if [ -z "${maildir_root}" ]; then
-  #  return 1
-  #fi
-
-  #echo "${maildir_root}"
 }
 
 #####################################################################
