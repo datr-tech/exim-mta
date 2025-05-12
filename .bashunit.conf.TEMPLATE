@@ -8,6 +8,10 @@
 #          template file will be copied to '.bashunit.conf',        #
 #          automatically.                                           #
 #                                                                   #
+#          Within the copied file, '.bashunit.conf', enter          #
+#          values for the required variables (declared below),      #
+#          and please do so before attempting 'npm run test'.       #
+#                                                                   #
 #          Within '.bashunit.conf' enter the required vars          #
 #					 before running any of the associated tests.              #
 #                                                                   #
