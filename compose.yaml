@@ -12,6 +12,7 @@
 
 include:
   - path: '../exim-db/compose.yaml'
+  - path: '../exim-imap/compose.yaml'
 services:
   exim-mta:
     build:
@@ -52,9 +53,6 @@ services:
       - type: volume
         source: ${EXIM_DB_SOCKET_VOLUME}
         target: ${EXIM_DB_SOCKET_VOLUME_TARGET}
-      #- type: volume
-      #  source: dovecot_socket_volume
-      #  target: /var/run/dovecot
-      #- type: bind
-      # source: /var/mail
-      # target: /var/mail
+      - type: volume
+        source: ${EXIM_IMAP_SOCKET_VOLUME}
+        target: ${EXIM_IMAP_SOCKET_VOLUME_TARGET}
