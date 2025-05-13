@@ -25,6 +25,7 @@
   },
   "scripts": {
     "bashunit:load": "./scripts/bashunit_load.sh",
+    "certs:generate": "./scripts/generate_certs.sh",
     "changelog": "npx auto-changelog",
     "changelog:add": "git add ./CHANGELOG.md",
     "changelog:commit": "git commit -m 'ci: update changelog' --no-verify",
@@ -61,13 +62,14 @@
     "spell": "npx cspell .",
     "start": "npm run docker:up",
     "stop": "npm-run-all docker:down docker:rmi",
+    "ts": "npm run test:single",
     "template:bashunit:gen": "scripts/generate_conf_template.sh .bashunit.conf",
     "template:bashunit:cp": "sh -c 'cp ./.bashunit.conf.TEMPLATE ./.bashunit.conf'",
     "template:env": "scripts/generate_conf_template.sh .env",
     "template:env:cp": "sh -c 'cp ./.env.TEMPLATE ./.env'",
     "test": "npm run test:unit",
     "test:base": "./lib/bashunit --env ./.bashunit.conf",
-    "test:loc": "npm run test:base -- ./test/send_local_positive.test.sh",
+    "test:single": "npm run test:base -- ./test/temp.test.sh",
     "test:unit": "npm run test:base -- ./test/*.test.sh",
     "version": "npm-run-all changelog"
   },

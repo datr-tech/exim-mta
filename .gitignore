@@ -26,6 +26,7 @@
 # Hidden dirs to be ignored
 #
 .idea/
+.log/
 
 #
 # Hidden files to be ignored
@@ -36,6 +37,7 @@
 #
 # Standard dirs to be ignored
 #
+ca/
 lib/
 node_modules/
 
