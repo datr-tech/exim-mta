@@ -13,7 +13,7 @@
 #          and please do so before attempting 'npm run test'.       #
 #                                                                   #
 #          Within '.bashunit.conf' enter the required vars          #
-#					 before running any of the associated tests.              #
+#          before running any of the associated tests.              #
 #                                                                   #
 #          Unlike the template, '.bashunit.conf' will be            #
 #          ignored by git (see .gitignore).                         #
