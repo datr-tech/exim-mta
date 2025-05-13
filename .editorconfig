@@ -34,10 +34,3 @@ indent_style = tab
 [.git*]
 indent_size = tab
 indent_style = tab
-
-#
-# .sh overrides
-#
-[.sh*]
-indent_size = tab
-indent_style = tab

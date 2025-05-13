@@ -4,13 +4,19 @@
   "insertPragma": false,
   "overrides": [
     {
-      "files": [".mailmap"],
+      "files": [".bashunit.conf.TEMPLATE"],
       "options": {
         "parser": "sh"
       }
     },
     {
       "files": [".env.TEMPLATE"],
+      "options": {
+        "parser": "sh"
+      }
+    },
+    {
+      "files": [".mailmap"],
       "options": {
         "parser": "sh"
       }
