@@ -1,5 +1,5 @@
 {
-  "ignorePaths": [".git", "conf", "coverage", "lib", "node_modules"],
+  "ignorePaths": [".git", "ca", "conf", "coverage", "lib", "node_modules"],
   "language": "en-gb",
   "languageSettings": [
     {
@@ -11,6 +11,7 @@
     "Bashunit",
     "BUILDKIT",
     "datr",
+    "dozzle",
     "dvcm",
     "EHLO",
     "emta",

@@ -4,53 +4,42 @@
 #                                                                   #
 # Purpose: Provide bashunit config and bootstrap vars.              #
 #                                                                   #
-#          Following package installation by 'npm i' this           #
-#          template file will be copied to '.bashunit.conf',        #
-#          automatically.                                           #
-#                                                                   #
-#          Within the copied file, '.bashunit.conf', enter          #
-#          values for the required variables (declared below),      #
-#          and please do so before attempting 'npm run test'.       #
-#                                                                   #
-#          Within '.bashunit.conf' enter the required vars          #
-#          before running any of the associated tests.              #
-#                                                                   #
-#          Unlike the template, '.bashunit.conf' will be            #
-#          ignored by git (see .gitignore).                         #
-#                                                                   #
 # Date:    12th May 2025                                            #
 #                                                                   #
 # Author:  admin <admin@datr.tech>                                  #
 #                                                                   #
 #####################################################################
 
+#####################################################################
+#                                                                   #
+# 1.  BASHUIT DIRS                                                  #
+#                                                                   #
+#####################################################################
+
+BASHUNIT_DIR_COVERAGE=""
+BASHUNIT_DIR_LOG=""
 
 #####################################################################
 #                                                                   #
-# 1  BASHUIT CONFIG vars                                            #
+# 2.  BASHUIT CONFIG vars                                           #
 #                                                                   #
 #####################################################################
 
 BASHUNIT_BOOTSTRAP=""
 BASHUNIT_DEFAULT_PATH=""
+BASHUNIT_DEV_LOG=""
 BASHUNIT_DEV_MODE='<BOOL_VALUE>'
 BASHUNIT_HEADER_ASCII_ART='<BOOL_VALUE>'
+BASHUNIT_REPO_URL=""
+BASHUNIT_REPORT_HTML=""
 BASHUNIT_SHOW_HEADER='<BOOL_VALUE>'
 BASHUNIT_SIMPLE_OUTPUT='<BOOL_VALUE>'
 BASHUNIT_STOP_ON_FAILURE='<BOOL_VALUE>'
 BASHUNIT_VERBOSE='<BOOL_VALUE>'
-BASHUNIT_DEV_LOG=""
-BASHUNIT_REPORT_HTML=""
-
-#
-# The following var is required by ./scripts/bashunit_load.sh,
-# which is the final sub-command to be run by 'postinstall' (NPM).
-#
-BASHUNIT_REPO_URL="https://bashunit.typeddevs.com/install.sh"
 
 #####################################################################
 #                                                                   #
-# 2. BOOTSTRAP VARS                                                 #
+# 3. BOOTSTRAP VARS                                                 #
 #                                                                   #
 #    The variables below are passed to ./test/bootstrap.sh          #
 #    and are accessible within each of the ./test/*.test.sh files.  #

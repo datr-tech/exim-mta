@@ -25,6 +25,7 @@
 #
 # Hidden dirs to be ignored
 #
+.coverage
 .idea/
 .log/
 

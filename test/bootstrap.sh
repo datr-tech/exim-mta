@@ -24,14 +24,16 @@ set -euo pipefail
 #                                                                   #
 # 1 SCRIPT PERMISSIONS AND DEPENDENCY CHECKS                        #
 #                                                                   #
-# 1.1 CHECK SCRIPT PERMISSIONS                                      #
-# 1.2 SCRIPT CONSTANTS                                              #
-# 1.3 DEFINE THE REQUIRED SCRIPT AND TEST DEPENDENCIES              #
-# 1.4 CHECK THE REQUIRED SCRIPT AND TEST DEPENDENCIES               #
-# 1.5 DEFINE THE REQUIRED ENV VARS (from .env)                      #
-# 1.6 CHECK THE REQUIRED ENV VARS                                   #
-# 1.7 PRINT AVAILABLE ENV VARS                                      #
-# 1.8 CHECK BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH                  #
+#  1.1   CHECK SCRIPT PERMISSIONS                                   #
+#  1.2   SCRIPT CONSTANTS                                           #
+#  1.3   DEFINE THE REQUIRED SCRIPT AND TEST DEPENDENCIES           #
+#  1.4   CHECK THE REQUIRED SCRIPT AND TEST DEPENDENCIES            #
+#  1.5   DEFINE THE REQUIRED ENV VARS (from .env)                   #
+#  1.6   CHECK THE REQUIRED ENV VARS                                #
+#  1.7   PRINT AVAILABLE ENV VARS                                   #
+#  1.8   CHECK BOOTSTRAP_SCRIPT_MAILDIR_ROOT_SQL_PATH               #
+#  1.9   DEFINE THE REQUIRED DIRS                                   #
+#  1.10  CHECK THE REQUIRED DIRS                                    #
 #                                                                   #
 #                                                                   #
 # 2 COMMON FUNCTIONS (which can be called from the test files)      #
